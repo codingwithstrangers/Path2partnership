@@ -1,0 +1,26 @@
+What we want
+1. I want to make a twitch bot that monitors activer viewers, this bot will calulate to the hour how long each viewer is watching. to enter the race you must 
+use channel points 100 channelpoints. You can move up using items and lose spots with items. the goal is to travel the furthest (spend the most active
+time in chat)
+
+How you gonna do this
+- Twitch bot?
+- Python
+
+What do you need
+- twitch bot token
+
+Game play
+1. the user doesnt need to do anything but watch, every min they wil move 1 space a total of 60 spoaces (loop)
+2. they will get 3 boost that move them up 1 spot (ever bost cost 10 chats)(doesnt start recharing until all 3 are used up(can only be used 1 ever 30 chats)
+(chat message must not be spam))
+3.you can leave traps for people (if someone hits your trap they lose space equal to the cost of the trap)
+4. trap power and bosst power run on the same source of energy. So either you play defense or offences based on the length of time you are watching
+5. player actively watching will have color pix
+6. users who paid to play but are not active will be greyed out and zzz
+7. traps are hidden on screen (player can see their trap if possible)
+
+Visual things
+1. 7x7 px screen for player icon
+2. 10x10 px race track (1920*1080)
+(traps )
