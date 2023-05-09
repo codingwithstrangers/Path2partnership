@@ -1,11 +1,6 @@
-import asyncio
-import os
-from twitchio.ext import commands, routines
-from clientshit import access_token
 from twitchio.ext import commands
 
-
-class Hot_Tub_Partner(commands.bot):
+class Bot (commands.Bot):
     viewer_activity = {}
     def __init__(self):
         # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
@@ -21,3 +16,22 @@ class Hot_Tub_Partner(commands.bot):
         print(f'Logged in as | {self.nick}')
         print(f'User id is | {self.user_id}')
         print("this shit works")
+
+        #this is how the routine starts
+        self.send_racer.start()
+
+    async def event_message(self, message):
+        # Messages with echo set to True are messages sent by the bot...
+        # For now we just want to ignore them...
+        if message.echo:
+            return
+        # Print the contents of our message to console...
+        print(message.content.encode("utf-8"))
+        print(message.author.name)
+    
+bot = Bot()
+bot.run()
+# bot.run() is blocking and will stop execution of any below code here until stopped or closed.     
+
+    
+
