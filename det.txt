@@ -24,3 +24,7 @@ Visual things
 1. 7x7 px screen for player icon
 2. 10x10 px race track (1920*1080)
 (traps )
+
+client_id = comes from console on twitch developer it is called client id 
+twitch oauth = https://twitchapps.com/tmi/
+access token is really your token and you get from access token from here = https://twitchtokengenerator.com/?code=5ufjtyqsgris4pl4f77ebzw4fq1lgp&scope=clips%3Aedit+bits%3Aread+chat%3Aread+chat%3Aedit+channel%3Aread%3Aredemptions&state=frontend%7COUtSUkxyQjBiaEN3TjFENWI0eDRVUT09
