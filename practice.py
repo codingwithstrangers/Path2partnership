@@ -4,36 +4,29 @@ import twitchio
 import channel_points
 import asyncio
 from twitchio.ext import pubsub
-# from basic_bot import Bot
 import os
+import twitchio
+from twitchio.ext import commands, eventsub
 from dotenv import load_dotenv
-# from pywitch import PyWitchRedemptions, run_forever
-# from basic_bot import Bot
-# from websocket import create_connection
-# import time
-# import json
-# import random
-# import threading
-# from .pywitch_functions import (
-#     validate_token,
-#     validate_callback,
-#     get_user_info,
-#     pywitch_log,
-#     json_eval,
-# )
 load_dotenv()
  
 client_id = os.environ['CLIENT_ID']
 access_token = os.environ['ACCESS_TOKEN']
+client_secret = os.environ['CLIENT_SECRET']
 users_oauth_token = os.environ['USER_OAUTH_TOKEN']
 users_channel_id = int(os.environ['USER_CHANNEL_ID'])
 initial_channel = os.environ['INITIAL_CHANNEL']
+web_hook =os.environ['WEBHOOK']
+call_back = 'https://1443-72-133-128-106.ngrok-free.app'
  
 client = twitchio.Client(token=client_id)
 client.pubsub = pubsub.PubSubPool(client)
 users_using_reward = set()
 REWARD_NAME = 'The Perfect Lurker'
 user_channel_id = 195345186
+
+esbot = commands.Bot.from_client_credentials(client_id= client_id, client_secret=client_secret)
+esclient = eventsub.EventSubClient(esbot, webhook_secret= web_hook, callback_route= call_back)
  
 class Bot(commands.Bot):
  
@@ -50,43 +43,40 @@ class Bot(commands.Bot):
         print(f'User id is | {self.user_id}')
         print('this shit blows')
 
-    
- 
-    # async def event_message(self, message):
-    #     # Messages with echo set to True are messages sent by the bot...
-    #     # For now we just want to ignore them...
-    #     if message.echo:
-    #         return
- 
-    #     # Print the contents of our message to console...
-    #     print(message.content)
- 
-    #     # Since we have commands and are overriding the default `event_message`
-    #     # We must let the bot know we want to handle and invoke our commands...
-    #     await self.handle_commands(message)
- 
-    # @commands.command()
-    # async def hello(self, ctx: commands.Context):
-    #     # Here we have a command hello, we can invoke our command with our prefix and command name
-    #     # e.g ?hello
-    #     # We can also give our commands aliases (different names) to invoke with.
- 
-    #     # Send a hello back!
-    #     # Sending a reply back to the channel is easy... Below is an example.
-    #     print(f'{ctx.author.name} used ?hello')
-    #     if ctx.author.name == 'codingwithstrangers':
-    #         await ctx.send(f'Hello Echo!')
-    #     else:
-    #         await ctx.send(f'Hello {ctx.author.name}!')
-    # @commands.command()
-    # async def perfect_lurker_checkin(self, ctx: commands.Context):
-    #     # Here we have a command hello, we can invoke our command with our prefix and command name
-    #     # e.g ?hello
-    #     # We can also give our commands aliases (different names) to invoke with.
- 
-    #     # Send a hello back!
-    #     # Sending a reply back to the channel is easy... Below is an example.
-    #     print(f'{ctx.author.name} checked in')
- 
+
+    async def __ainit__(self) -> None:
+        self.loop.create_task(esclient.listen(port=4040))
+        try:
+            await esclient.subscribe_channel_follows_v2(broadcaster= user_channel_id, moderator=user_channel_id)
+        except twitchio.HTTPException:
+            pass
+
+    async def event_ready(self):
+        print("Bot is ready!")
+
+    @esbot.event()
+    async def event_pubsub_channel_points(event: pubsub.PubSubChannelPointsMessage):
+        print(event)
+        pass # do stuff on channel point redemptions
+        print("Received event!")
+    async def __ainit__(self) -> None:
+            self.loop.create_task(esclient.listen(port=4040))
+            try:
+                await esclient.subscribe_channel_follows_v2(broadcaster= user_channel_id, moderator=user_channel_id)
+            except twitchio.HTTPException:
+                pass  
+
 bot = Bot()
+bot.loop.run_until_complete(bot.__ainit__())
+
+
+
+
+@esbot.event()
+async def event_eventsub_notification_followV2(payload: eventsub.ChannelFollowData) -> None:
+    print("Received event!")
+    channel = bot.get_channel("codingwithstrangers")
+    await channel.send(f"{payload.data.user.name} followed woohoo!")        
+
+
 bot.run()
