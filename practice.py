@@ -96,7 +96,7 @@ bot.loop.run_until_complete(bot.__ainit__())
 strangest_racers ={}
 @esbot.event()
 #this is how you pull the events for ONLY custom channel point this is only listening (may block other listeners)
-async def event_eventsub_notificication_channel_points_redeemed(payload: eventsub.CustomReward)-> None:
+async def event_eventsub_notification_channel_points_redeemed(payload: eventsub.CustomReward)-> None:
 #Adding Racers to my dict.
     user_name = payload.data.user.name
     if user_name in strangest_racers:
