@@ -40,6 +40,7 @@ esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callba
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token=_TOKEN, prefix="?", initial_channels=_CHANNEL_NAME)
+   
 
     async def __ainit__(self) -> None:
         self.loop.create_task(esclient.listen(port=_ESCLIENT_PORT))
@@ -59,63 +60,45 @@ class Bot(commands.Bot):
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
-# __slots__ = "_http", _USER_CHANNEL_ID, "id", "user_id", "user_name", "input", "status", "redeemed_at", "reward"
-# # The __slots__ attribute restricts the instance attributes of the class to the listed names for memory efficiency.
-# users_in_race = {}
-# redeemed_at = datetime
-# def __init__(self, obj: dict, http: _CALLBACK, parent: Optional[CustomReward]):
-#     self._http = http
-#     self._broadcaster_id = obj[_USER_CHANNEL_ID]
-#     # Assign the value of the "broadcaster_id" key from the obj dictionary to _broadcaster_id.
+#we want to capture all the current chatters in chat 
+#setup for the bot code needs work and does the real bot have
+#permission to do this listener for viewers
+class bot_test (commands.Bot):
+    def __init__(self):
+        super().__init__(token=_TOKEN, prefix="?", initial_channels=_CHANNEL_NAME)
+async def event_ready():
+        strangest_chatters = {}
+        channel = _CHANNEL_NAME
+        if channel is not None:
+            chatters = channel.chatters
+            if chatters is not None:
+                for chatter in chatters:
+                    strangest_chatters[chatter.name] = True
+                    logger.info(f"Added {chatter.name} to strangest_chatters")
+                else:
+                    logger.info("No chatters available")
+            else:
+                logger.info(f"da fux you looking at")
+bot_test = Bot() 
 
-#     self.id = obj["id"]
-#     # Assign the value of the "id" key from the obj dictionary to id.
 
-#     self.user_id = int(obj["user_id"])
-#     # Assign the value of the "user_id" key from the obj dictionary to user_id after converting it to an integer.
 
-#     self.user_name = obj["user_name"]
-#     # Assign the value of the "user_name" key from the obj dictionary to user_name.
-
-#     self.input = obj["user_input"]
-#     # Assign the value of the "user_input" key from the obj dictionary to input.
-
-#     self.status = obj["status"]
-#     # Assign the value of the "status" key from the obj dictionary to status.
-
-#     self.redeemed_at = parse_timestamp(obj["redeemed_at"])
-#     # Assign the result of parse_timestamp function with the value of the "redeemed_at" key from the obj dictionary to redeemed_at.
-#     # Note: The parse_timestamp function is assumed to be defined elsewhere.
-
-#     self.reward = parent or obj["reward"]
-#     # Assign the value of the parent parameter if it is not None, otherwise assign the value of the "reward" key from the obj dictionary to reward.
-
-# def __repr__(self):
-# return f"<CustomRewardRedemption id={self.id} user_id={self.user_id} user_name={self.user_name} input={self.input} status={self.status} redeemed_at={self.redeemed_at}>"
-# # Returns a string representation of the class instance, displaying the values of id, user_id, user_name, input, status, and redeemed_at.
 strangest_racers ={}
-@esbot.event()
-#this is how you pull the events for ONLY custom channel point this is only listening (may block other listeners)
-async def event_eventsub_notificication_channel_points_redeemed(payload: eventsub.CustomReward)-> None:
-#Adding Racers to my dict.
-    user_name = payload.data.user.name
-    if user_name in strangest_racers:
-        logger.info(f"{payload.redemptions_current_stream}, Channel Point Event, {payload.data.user.name}")
-        #send message that racer is in race
-        await esbot.send_message(user_name, "Hey don't text and drive! You are already in the RACE!")
-    else:
-        strangest_racers[user_name] = True
-        logger.info(f"{payload.redemptions_current_stream}, Channel Point Event, {payload.data.user.name}")
-        #send message racer has joined
-        await esbot.send_message(user_name, "START your Engine!")
-    
-    print_names()
 
-    def print_names():
-        names = list(strangest_racers.keys())
-        print("Names in strange_racers dictionary:")
-        for name in names:
-            print(name)
+@esbot.event()
+async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
+    user_name = payload.data.user.name
+    logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
+     )
+    if len(strangest_racers)<= 75:
+        if user_name not in strangest_racers:
+            strangest_racers[user_name]=True
+            logger.info(f"added {user_name}")
+        else:
+            logger.info(f"{user_name} already in ditc.")
+    else:
+        logger.info(f"We at Max {user_name} try again later like next stream lol")
+
 
 
 @esbot.event()
