@@ -3,9 +3,9 @@ import os
 import twitchio
 import datetime
 from twitchio.ext import commands, eventsub
-from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, USER_CHANNEL_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
+from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, BROADCASTER_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
 
-logging.basicConfig(level=logging.INFO) # Set this to DEBUG for more logging, INFO for regular logging
+logging.basicConfig(level=logging.DEBUG) # Set this to DEBUG for more logging, INFO for regular logging
 logger = logging.getLogger("twitchio.http")
 
 
@@ -23,7 +23,7 @@ _TOKEN = TOKEN
 # 5.2 Start ngrok with 'ngrok http 4000'. This will act as our webhook and the url hast to be the same as in the twitch developer console
 _CALLBACK = CALLBACK
 _CHANNEL_NAME = CHANNEL_NAME
-_USER_CHANNEL_ID = USER_CHANNEL_ID
+_USER_CHANNEL_ID = BROADCASTER_ID
 _MODERATOR_ID = MODERATOR_ID
 # 9. _WEBOOK_SECRET is a >10 digit random string. If this string changes then you need to reauthorize the twitch app for every (click the 'Click this' link again).
 _WEBHOOK_SECRET = WEBHOOK_SECRET
@@ -40,7 +40,6 @@ esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callba
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token=_TOKEN, prefix="?", initial_channels=_CHANNEL_NAME)
-   
 
     async def __ainit__(self) -> None:
         self.loop.create_task(esclient.listen(port=_ESCLIENT_PORT))
@@ -52,7 +51,7 @@ class Bot(commands.Bot):
             await esclient.subscribe_channel_points_redeemed(broadcaster=_USER_CHANNEL_ID)
             logger.debug(f"Subscribed esclient to subscribe_channel_follows_v2")
         except twitchio.HTTPException as e:
-            logger.error(f"esclient failed to subscribe: {e}")
+            logger.exception(f"esclient failed to subscribe: {e}")
 
     async def event_ready(self):
         logger.info(f"Bot is ready!")
@@ -60,46 +59,29 @@ class Bot(commands.Bot):
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
-#we want to capture all the current chatters in chat 
-#setup for the bot code needs work and does the real bot have
-#permission to do this listener for viewers
-class bot_test (commands.Bot):
-    def __init__(self):
-        super().__init__(token=_TOKEN, prefix="?", initial_channels=_CHANNEL_NAME)
-async def event_ready():
-        strangest_chatters = {}
-        channel = _CHANNEL_NAME
-        if channel is not None:
-            chatters = channel.chatters
-            if chatters is not None:
-                for chatter in chatters:
-                    strangest_chatters[chatter.name] = True
-                    logger.info(f"Added {chatter.name} to strangest_chatters")
-                else:
-                    logger.info("No chatters available")
-            else:
-                logger.info(f"da fux you looking at")
-bot_test = Bot() 
+# Command to retrieve current viewers
+@bot.command(name='viewers')
+async def get_viewers(ctx):
+    viewers = ', '.join(bot.get_channel(_CHANNEL_NAME).members.keys())
+    await ctx.send(f'Current viewers: {viewers}')
+    logger.info(f"are lurking{viewers}")
 
+# Run the bot
+bot.run()
 
 
 strangest_racers ={}
-
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )
-    if len(strangest_racers)<= 75:
-        if user_name not in strangest_racers:
-            strangest_racers[user_name]=True
-            logger.info(f"added {user_name}")
-        else:
-            logger.info(f"{user_name} already in ditc.")
+    if user_name not in strangest_racers:
+        strangest_racers[user_name]=True
+        logger.info(f"added {user_name}")
     else:
-        logger.info(f"We at Max {user_name} try again later like next stream lol")
-
-
+        logger.info(f"{user_name} already in ditc.")
+        
 
 @esbot.event()
 #this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)

@@ -3,7 +3,7 @@ import os
 import twitchio
 import datetime
 from twitchio.ext import commands, eventsub
-from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, USER_CHANNEL_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
+from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, BROADCASTER_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
 
 logging.basicConfig(level=logging.INFO) # Set this to DEBUG for more logging, INFO for regular logging
 logger = logging.getLogger("twitchio.http")
@@ -23,7 +23,7 @@ _TOKEN = TOKEN
 # 5.2 Start ngrok with 'ngrok http 4000'. This will act as our webhook and the url hast to be the same as in the twitch developer console
 _CALLBACK = CALLBACK
 _CHANNEL_NAME = CHANNEL_NAME
-_USER_CHANNEL_ID = USER_CHANNEL_ID
+_USER_CHANNEL_ID = BROADCASTER_ID
 _MODERATOR_ID = MODERATOR_ID
 # 9. _WEBOOK_SECRET is a >10 digit random string. If this string changes then you need to reauthorize the twitch app for every (click the 'Click this' link again).
 _WEBHOOK_SECRET = WEBHOOK_SECRET
@@ -51,7 +51,7 @@ class Bot(commands.Bot):
             await esclient.subscribe_channel_points_redeemed(broadcaster=_USER_CHANNEL_ID)
             logger.debug(f"Subscribed esclient to subscribe_channel_follows_v2")
         except twitchio.HTTPException as e:
-            logger.error(f"esclient failed to subscribe: {e}")
+            logger.exception(f"esclient failed to subscribe: {e}")
 
     async def event_ready(self):
         logger.info(f"Bot is ready!")
