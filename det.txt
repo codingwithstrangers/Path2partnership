@@ -28,3 +28,16 @@ Visual things
 client_id = comes from console on twitch developer it is called client id 
 twitch oauth = https://twitchapps.com/tmi/
 access token is really your token and you get from access token from here = https://twitchtokengenerator.com/?code=5ufjtyqsgris4pl4f77ebzw4fq1lgp&scope=clips%3Aedit+bits%3Aread+chat%3Aread+chat%3Aedit+channel%3Aread%3Aredemptions&state=frontend%7COUtSUkxyQjBiaEN3TjFENWI0eDRVUT09
+
+Game time
+how to score points, pre rec need to use channel point,and watch stream
+
+Point system
+1. the user will get .5 point forevery 1 min they watch stream
+2. user can get bonus .5 point for following
+3. user will get bonus for subbing .5
+4.
+
+Losing points
+1. chatting per chat .5
+2.

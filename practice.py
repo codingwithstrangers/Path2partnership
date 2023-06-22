@@ -5,7 +5,7 @@ import datetime
 from twitchio.ext import commands, eventsub
 from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, BROADCASTER_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
 
-logging.basicConfig(level=logging.DEBUG) # Set this to DEBUG for more logging, INFO for regular logging
+logging.basicConfig(level=logging.INFO) # Set this to DEBUG for more logging, INFO for regular logging
 logger = logging.getLogger("twitchio.http")
 
 
@@ -59,17 +59,6 @@ class Bot(commands.Bot):
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
-# Command to retrieve current viewers
-@bot.command(name='viewers')
-async def get_viewers(ctx):
-    viewers = ', '.join(bot.get_channel(_CHANNEL_NAME).members.keys())
-    await ctx.send(f'Current viewers: {viewers}')
-    logger.info(f"are lurking{viewers}")
-
-# Run the bot
-bot.run()
-
-
 strangest_racers ={}
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
@@ -77,10 +66,14 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )
     if user_name not in strangest_racers:
-        strangest_racers[user_name]=True
-        logger.info(f"added {user_name}")
-    else:
-        logger.info(f"{user_name} already in ditc.")
+        strangest_racers[user_name] = True
+        logger.info(f"Added {user_name}")
+        write_to_file()
+
+def write_to_file():
+    with open('the_strangest_racer.txt', 'w') as file:
+        for user_name in strangest_racers.keys():
+            file.write(user_name + '\n')
         
 
 @esbot.event()
@@ -95,5 +88,11 @@ async def event_eventsub_notification_followV2(payload: eventsub.ChannelFollowDa
 #    channel = esbot.get_channel('channel')
 #    channel = esbot.get_channel(payload.data.broadcaster.name)
 #    await channel.send(f"{payload.data.user.name} followed KreyGasm!")
+
+@esbot.event()
+#this is how you pull the whos folloing me
+async def event_eventsub_subscribe_channel_follows_v2(payload: eventsub.ChannelFollowData) -> None:
+    follows = payload.user.fetch_follow(to_user=_CHANNEL_NAME)
+    #cant do it this way need token and autho of every viewer 
 
 bot.run()

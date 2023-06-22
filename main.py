@@ -66,10 +66,14 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )
     if user_name not in strangest_racers:
-        strangest_racers[user_name]=True
-        logger.info(f"added {user_name}")
-    else:
-        logger.info(f"{user_name} already in ditc.")
+        strangest_racers[user_name] = True
+        logger.info(f"Added {user_name}")
+        write_to_file()
+
+def write_to_file():
+    with open('the_strangest_racer.txt', 'w') as file:
+        for user_name in strangest_racers.keys():
+            file.write(user_name + '\n')
         
 
 @esbot.event()
@@ -84,5 +88,11 @@ async def event_eventsub_notification_followV2(payload: eventsub.ChannelFollowDa
 #    channel = esbot.get_channel('channel')
 #    channel = esbot.get_channel(payload.data.broadcaster.name)
 #    await channel.send(f"{payload.data.user.name} followed KreyGasm!")
+
+@esbot.event()
+#this is how you pull the whos folloing me
+async def event_eventsub_subscribe_channel_follows_v2(payload: eventsub.ChannelFollowData) -> None:
+    follows = payload.user.fetch_follow(to_user=_CHANNEL_NAME)
+    #cant do it this way need token and autho of every viewer 
 
 bot.run()

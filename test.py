@@ -47,20 +47,26 @@ class MyBot(commands.Bot):
     # Command to retrieve current viewers
     perfect_lurkers= {}
     async def event_message(self, message):
+        follower_username = await cli
         
-        lurker = message.channel.get_chatter(message.author.name)
-        self.perfect_lurkers[lurker] = True  
+        # lurker = message.channel.get_chatter(message.author.name)
+        # print(f"lurker",(lurker) )
+    async def event_message(self, message):
+        subscriber_username = message.author.is_subscriber
+        
+        print(f'{subscriber_username} is a real one 🌟')
+
 
         #write this shit to csv
       # Remove duplicates and write perfect lurkers to a CSV file
-    unique_lurkers = list(set(perfect_lurkers.keys()))
-    file_exists = os.path.isfile("lurkers.csv")
-    with open("lurkers.csv", "a", newline="") as file:
-        writer = csv.writer(file)
-        if not file_exists:
-            writer.writerow(["lurker"])  # Write the header
-        writer.writerows(unique_lurkers)
-        print(f"lurker",(lurker) )
+    # unique_lurkers = list(set(perfect_lurkers.keys()))
+    # file_exists = os.path.isfile("lurkers.csv")
+    # with open("lurkers.csv", "a", newline="") as file:
+    #     writer = csv.writer(file)
+    #     if not file_exists:
+    #         writer.writerow(["lurker"])  # Write the header
+    #     writer.writerows(unique_lurkers)
+    #     print(f"lurker",(lurker) )
 
         # print("test2")
         # if lurker:
