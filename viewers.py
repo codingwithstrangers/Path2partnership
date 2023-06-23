@@ -58,29 +58,13 @@ for i in range(duration):
     #prints List of total viewers 
     print(total_list)
 
-    #write to txt file (always write vs append)
-    with open("All_viewers.txt",'w') as file:
-        file.write('\n'.join(total_list))
+    # Convert elements of total_list to lowercase
+    lowercase_list = [item.lower() for item in total_list]
 
-    #read the files
-    # def compare_files(file1, file2, output_file):
-    #     with open(file1, 'r') as f1, open(file2, 'r') as f2, open(output_file, 'w') as output:
-    #         file1_names = set(f1.read().splitlines())
-    #         file2_names = set(f2.read().splitlines())
-        
-    #     matching_names = file1_names.intersection(file2_names)
-        
-    #     for name in matching_names:
-    #         output.write(name + '\n')
-
-    # # Specify the file paths
-    # file1_path = 'All_viewers.txt'
-    # file2_path = 'the_strangest_racer.txt'
-    # output_file_path = 'lurker_score.txt'
-
-    # Compare the files and extract matching names
-    # compare_files(file1_path, file2_path, output_file_path)
-
+    # Write lowercase_list to a text file
+    with open("All_viewers.txt", 'w') as file:
+        file.write('\n'.join(lowercase_list))
+   
 #cmpare each file
     with open("All_viewers.txt", 'r') as file:
         All_viewers = file.read().splitlines()
@@ -99,9 +83,9 @@ for i in range(duration):
 
 
     # Write the matching names to the "lurker_score.txt" file
-    with open("lurker_score.txt", "w") as file:
+    with open("lurker_score.csv", "w") as file:
         for name in matching_names:
-            file.write(f"{name}\n")
+            file.write(f"{name.lower()}\n")
 
     #pause the loop 
     time.sleep(60)

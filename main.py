@@ -39,7 +39,34 @@ esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callba
 
 class Bot(commands.Bot):
     def __init__(self):
-        super().__init__(token=_TOKEN, prefix="?", initial_channels=_CHANNEL_NAME)
+        super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
+            nick = "Perfect_Lurker")
+        print("Test1")
+
+        
+    perfect_lurkers = {}
+
+    async def event_message(self, message):
+        message_content = message.content
+        user= message.author.name
+        if "!remove" in message_content:
+            file_name = "the_strangest_racer.txt"
+
+        with open(file_name, "r+") as file:
+            lines = file.readlines()
+            file.seek(0)
+            
+            for line in lines:
+                if user not in line:
+                    file.write(line)
+            
+            file.truncate()
+        
+        print(f"{user} has been removed from {file_name}.")
+
+        
+    def __init__(self):
+        super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
 
     async def __ainit__(self) -> None:
         self.loop.create_task(esclient.listen(port=_ESCLIENT_PORT))
@@ -55,6 +82,8 @@ class Bot(commands.Bot):
 
     async def event_ready(self):
         logger.info(f"Bot is ready!")
+
+    
     print('why my shit not working?')
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
@@ -69,11 +98,12 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
         strangest_racers[user_name] = True
         logger.info(f"Added {user_name}")
         write_to_file()
+   
 
 def write_to_file():
     with open('the_strangest_racer.txt', 'w') as file:
         for user_name in strangest_racers.keys():
-            file.write(user_name + '\n')
+            file.write(user_name.lower() + '\n')
         
 
 @esbot.event()
