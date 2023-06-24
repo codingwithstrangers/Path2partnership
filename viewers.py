@@ -22,7 +22,7 @@ driver = webdriver.Chrome(executable_path=driver_path,options=options)
 stream = "https://www.twitch.tv/codingwithstrangers/chat"
 
 #loop my shit duration of bot 
-duration = 60
+duration = 180
 
 #the loop
 for i in range(duration):

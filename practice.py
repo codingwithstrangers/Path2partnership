@@ -1,5 +1,7 @@
 import logging; 
+from collections import OrderedDict
 import os
+import time
 import twitchio
 import datetime
 from twitchio.ext import commands, eventsub
@@ -36,19 +38,22 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
 
-
+strangest_racers = OrderedDict()
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker")
         print("Test1")
 
+#how we are removing racers from list and file
     async def event_message(self, message):
         message_content = message.content
         user= message.author.name
+        file_name = "the_strangest_racer.txt"
         if "!remove" in message_content:
-            file_name = "the_strangest_racer.txt"
-            strangest_racers = {}
+            strangest_racers.pop(user)
+            write_to_file()
+
         with open(file_name, "r+") as file:
             lines = file.readlines()
             file.seek(0)
@@ -56,19 +61,14 @@ class Bot(commands.Bot):
             for line in lines:
                 if user not in line:
                     file.write(line)
-
+            
             file.truncate()
 
-            #remove from that weakass strangest_racer list
-            if user in strangest_racers:
-                del strangest_racers[user]
-            
-            
             # Send a message to the chat
             channel = message.channel  # Replace with the appropriate channel object
             await channel.send(f"{user} has been removed from The Perfect Lurker.")
 
-        print(f"{user} has been removed from {file_name}.")
+        # print(f"{user} has been removed from {file_name}.")
 
 
     def __init__(self):
@@ -94,7 +94,9 @@ class Bot(commands.Bot):
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
-strangest_racers ={}
+
+#adding racers to list and then writing file
+
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
@@ -105,13 +107,14 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
         logger.info(f"Added {user_name}")
         write_to_file()
    
-
+#how text file is sorted and added 
 def write_to_file():
-    # sorted_racers = sorted(strangest_racers.keys(), key=lambda x: x.lower())
-    top_racers = list(strangest_racers.keys())[:5]
+    top_racers = list(strangest_racers.keys())[:3]
     with open('the_strangest_racer.txt', 'w') as file:
         for user_name in top_racers:
             file.write(user_name.lower() + '\n')
+    # time.sleep(10)        
+  
 
 @esbot.event()
 #this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)
