@@ -1,6 +1,7 @@
-import logging
-import csv 
+import logging; 
+from collections import OrderedDict
 import os
+import time
 import twitchio
 import datetime
 from twitchio.ext import commands, eventsub
@@ -37,20 +38,22 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
 
-class MyBot(commands.Bot):
+strangest_racers = {}
+class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker")
         print("Test1")
-
-        
-    perfect_lurkers = {}
-
+    message_content = message.content
+    
     async def event_message(self, message):
+        
         message_content = message.content
         user= message.author.name
         if "!remove" in message_content:
+            message_content = message.content
             file_name = "the_strangest_racer.txt"
+            dict_shit = strangest_racers
 
         with open(file_name, "r+") as file:
             lines = file.readlines()
@@ -63,17 +66,85 @@ class MyBot(commands.Bot):
             file.truncate()
         
         print(f"{user} has been removed from {file_name}.")
-      
-            
-
-
-
-
-
- 
-    
+        print(strangest_racers)
 
         
 
-bot =MyBot()
+    def __init__(self):
+        super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
+
+    async def __ainit__(self) -> None:
+        self.loop.create_task(esclient.listen(port=_ESCLIENT_PORT))
+#        await esclient.delete_all_active_subscriptions()
+#        logger.debug(f"Deleted all subscriptions")
+        try:
+            await esclient.subscribe_channel_follows_v2(broadcaster=_USER_CHANNEL_ID, moderator=_MODERATOR_ID)
+            await esclient.subscribe_channel_shoutout_receive(broadcaster=_USER_CHANNEL_ID, moderator=_MODERATOR_ID)
+            await esclient.subscribe_channel_points_redeemed(broadcaster=_USER_CHANNEL_ID)
+            logger.debug(f"Subscribed esclient to subscribe_channel_follows_v2")
+        except twitchio.HTTPException as e:
+            logger.exception(f"esclient failed to subscribe: {e}")
+
+    async def event_ready(self):
+        logger.info(f"Bot is ready!")
+
+    
+    print('why my shit not working?')
+bot = Bot()
+bot.loop.run_until_complete(bot.__ainit__())
+
+
+#adding racers to list and then writing file
+
+@esbot.event()
+async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
+    user_name = payload.data.user.name
+    logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
+     )
+    
+    if "!remove" in message_content:
+        if user_name in strangest_racers:
+            del strangest_racers[user_name]
+            logger.info(f"Removed {user_name}")
+            write_to_file()
+
+    else:
+        #adding names
+        if user_name not in strangest_racers:
+            strangest_racers[user_name] = True
+            logger.info(f"Added {user_name}")
+            write_to_file()
+#     if user_name not in strangest_racers:
+#         strangest_racers[user_name] = True
+#         logger.info(f"Added {user_name}")
+#         write_to_file()
+   
+# #how text file is sorted and added 
+def write_to_file():
+    top_racers = list(strangest_racers.keys())[:3]
+    with open('the_strangest_racer.txt', 'w') as file:
+        for user_name in top_racers:
+            file.write(user_name.lower() + '\n')
+    # time.sleep(10)        
+  
+
+@esbot.event()
+#this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)
+async def event_eventsub_notification_channel_shoutout_receive(payload: eventsub.ChannelShoutoutReceiveData) -> None:
+    logger.info(f"{payload.data.started_at}, Shoutout Event, {payload.data.user.name}")
+
+@esbot.event()
+#this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)
+async def event_eventsub_notification_followV2(payload: eventsub.ChannelFollowData) -> None:
+    logger.info(f"{payload.data.followed_at}, Follow Event, {payload.data.user.name}, {payload.data.broadcaster.name}") #this uses the payload timestamp instead
+#    channel = esbot.get_channel('channel')
+#    channel = esbot.get_channel(payload.data.broadcaster.name)
+#    await channel.send(f"{payload.data.user.name} followed KreyGasm!")
+
+@esbot.event()
+#this is how you pull the whos folloing me
+async def event_eventsub_subscribe_channel_follows_v2(payload: eventsub.ChannelFollowData) -> None:
+    follows = payload.user.fetch_follow(to_user=_CHANNEL_NAME)
+    #cant do it this way need token and autho of every viewer 
+
 bot.run()

@@ -36,7 +36,7 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
 
-
+strangest_racers ={}
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
@@ -44,7 +44,7 @@ class Bot(commands.Bot):
         print("Test1")
 
         
-    perfect_lurkers = {}
+    
 
     async def event_message(self, message):
         message_content = message.content
@@ -88,7 +88,7 @@ class Bot(commands.Bot):
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
-strangest_racers ={}
+
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
