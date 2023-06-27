@@ -43,14 +43,14 @@ class Bot(commands.Bot):
             nick = "Perfect_Lurker")
         print("Test1")
 
-        
-    
-
     async def event_message(self, message):
         message_content = message.content
         user= message.author.name
+        
         if "!remove" in message_content:
             file_name = "the_strangest_racer.txt"
+            del file_name[user]
+            
 
         with open(file_name, "r+") as file:
             lines = file.readlines()
