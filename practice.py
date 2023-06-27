@@ -36,33 +36,39 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
 
-strangest_racers ={}
+strangest_racers =[]
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker")
         print("Test1")
 
-    async def event_message(self, message):
+    
+    def event_message(self, message):
         message_content = message.content
         user= message.author.name
-        
         if "!remove" in message_content:
             file_name = "the_strangest_racer.txt"
-            del file_name[user]
-            
+
+            if user() in strangest_racers:
+                strangest_racers.remove(user())
+                write_to_file()
 
         with open(file_name, "r+") as file:
             lines = file.readlines()
-            file.seek(0)
-            
+
+        with open(file_name, "w") as file:
+            for line in lines:
+                if user not in line:
+                    file.write(line)
+
             for line in lines:
                 if user not in line:
                     file.write(line)
             
             file.truncate()
         
-        print(f"{user} has been removed from {file_name}.")
+        print(strangest_racers)
 
         
     def __init__(self):
@@ -103,7 +109,7 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
 def write_to_file():
     with open('the_strangest_racer.txt', 'w') as file:
         for user_name in strangest_racers.keys():
-            file.write(user_name.lower() + '\n')
+            file.write(user_name() + '\n')
         
 
 @esbot.event()

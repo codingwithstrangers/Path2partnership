@@ -1,7 +1,6 @@
 import logging; 
-from collections import OrderedDict
+import csv
 import os
-import time
 import twitchio
 import datetime
 from twitchio.ext import commands, eventsub
@@ -38,38 +37,39 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
 
-strangest_racers = {}
+racer_csv = "the_strangest_racer.csv"
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker")
         print("Test1")
-    message_content = message.content
-    
+
     async def event_message(self, message):
-        
         message_content = message.content
         user= message.author.name
-        if "!remove" in message_content:
-            message_content = message.content
-            file_name = "the_strangest_racer.txt"
-            dict_shit = strangest_racers
-
-        with open(file_name, "r+") as file:
-            lines = file.readlines()
-            file.seek(0)
-            
-            for line in lines:
-                if user not in line:
-                    file.write(line)
-            
-            file.truncate()
         
+        if "!remove" in message_content:
+                
+                with open(file_name, "a", newline='') as file:
+                    rows = list(csv.reader(file))
+                    file.seek(0)
+                    writer = csv.writer(file)
+                        
+                    for row in rows:
+                    # Check if the user's name is not in the row
+                        if user not in row:
+                            # Write the row back to the file
+                            writer.writerow(row)
+
+        # Open the file in write mode to truncate and remove remaining content
+        with open(file_name, "w", newline='') as file:
+            file.truncate()
+
+        # Print a message indicating the user has been removed
         print(f"{user} has been removed from {file_name}.")
         print(strangest_racers)
 
         
-
     def __init__(self):
         super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
 
@@ -94,39 +94,22 @@ bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
 
-#adding racers to list and then writing file
-
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )
-    
-    if "!remove" in message_content:
-        if user_name in strangest_racers:
-            del strangest_racers[user_name]
-            logger.info(f"Removed {user_name}")
-            write_to_file()
-
-    else:
-        #adding names
-        if user_name not in strangest_racers:
-            strangest_racers[user_name] = True
-            logger.info(f"Added {user_name}")
-            write_to_file()
-#     if user_name not in strangest_racers:
-#         strangest_racers[user_name] = True
-#         logger.info(f"Added {user_name}")
-#         write_to_file()
+    if user_name not in racer_csv:
+        racer_csv[user_name] = True
+        logger.info(f"Added {user_name}")
+        write_to_csv()
    
-# #how text file is sorted and added 
-def write_to_file():
-    top_racers = list(strangest_racers.keys())[:3]
-    with open('the_strangest_racer.txt', 'w') as file:
-        for user_name in top_racers:
-            file.write(user_name.lower() + '\n')
-    # time.sleep(10)        
-  
+
+def write_to_csv():
+    with open('the_strangest_racer.csv', 'w') as file:
+        for user_name in racer_csv.keys():
+            file.write(user_name + '\n')
+        
 
 @esbot.event()
 #this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)
