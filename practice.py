@@ -38,6 +38,19 @@ esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
 
 racer_csv = "the_strangest_racer.csv"
+
+#resad csv
+with open (racer_csv, 'r',newline='') as file:
+    reader = csv.reader(file)
+    data = [row for row in reader]
+lower_case = [[cell.lower() for cell in row]for row in data]
+
+#write it back in lower if done right
+with open (racer_csv, 'w', newline='') as file:
+    writer = csv.writer(file)
+    writer.writerows(lower_case)
+
+
 class Bot(commands.Bot):
     def __init__(self):
         super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
@@ -81,8 +94,10 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
 
     #if user_name is not in racer list
     if not user_exists:
-        racers.append([user_name])
-                  
+        racers.append([user_name.casefold()])
+        # racers.append([user_name])
+
+                 
     #now add some shit to csv
     with open(racer_csv, 'w', newline='') as file:
         writer = csv.writer(file)

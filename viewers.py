@@ -57,35 +57,25 @@ for i in range(duration):
 
     #prints List of total viewers 
     print(total_list)
-
-    # Convert elements of total_list to lowercase
-    lowercase_list = [item.lower() for item in total_list]
-
-    # Write lowercase_list to a text file
+    racer_csv = "the_strangest_racer.csv"
+# create first text file
     with open("All_viewers.txt", 'w') as file:
-        file.write('\n'.join(lowercase_list))
+        lower_caseshit = '\n'.join(total_list).lower()
+        file.write(lower_caseshit)
    
-#cmpare each file
-    with open("All_viewers.txt", 'r') as file:
-        All_viewers = file.read().splitlines()
-    with open("the_strangest_racer.txt", 'r')as file:
-        the_strangest_racer= file.read().splitlines()
+#compare each file
+    with open("All_viewers.txt", 'r') as file1:
+        All_viewers = file1.read().splitlines()
+    with open(racer_csv, 'r')as file2:
+        the_strangest_racer= file2.read().splitlines()
 
     #check booth list for match
-    lurker_score = {}
+    matching_names = set(All_viewers) & set(the_strangest_racer)
 
-    matching_names = []
-
-    #check if names are matching 
-    for viewer in All_viewers:
-        if viewer in the_strangest_racer:
-            matching_names.append(viewer)
-
-
-    # Write the matching names to the "lurker_score.txt" file
-    with open("lurker_score.csv", "w") as file:
+      # Write the matching names to the "lurker_score.txt" file
+    with open("lurker_score.txt", "w") as file:
         for name in matching_names:
-            file.write(f"{name.lower()}\n")
+            file.write(f"{name}\n")
 
     #pause the loop 
     time.sleep(60)
