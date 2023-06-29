@@ -38,22 +38,24 @@ esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
 
 racer_csv = "the_strangest_racer.csv"
-
-#resad csv
-with open (racer_csv, 'r',newline='') as file:
-    reader = csv.reader(file)
-    data = [row for row in reader]
-lower_case = [[cell.lower() for cell in row]for row in data]
-
-#write it back in lower if done right
-with open (racer_csv, 'w', newline='') as file:
-    writer = csv.writer(file)
-    writer.writerows(lower_case)
+strangest_racers = {}
 
 
 class Bot(commands.Bot):
+    @commands.command()
+    async def remove(self, ctx: commands.Context):
+        global strangest_racers
+        print(strangest_racers)
+        user= ctx.author.name.lower()
+        if user in strangest_racers:
+            del strangest_racers[user]
+            write_to_file()
+            # Send a hello back!
+            await ctx.send(f'Ok Ok take yo last place havin ass on the {ctx.author.name}!')
+    
+
     def __init__(self):
-        super().__init__(token= TOKEN , prefix='?', initial_channels=['codingwithstrangers'],
+        super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker")
         print("Test1")
     def __init__(self):
@@ -83,25 +85,23 @@ bot.loop.run_until_complete(bot.__ainit__())
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
+    max_racers = 5
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )
     #read csv
-    with open(racer_csv, 'r') as file:
-        reader = csv.reader(file)
-        racers = list(reader)
-    #check if the user is in the readerlist
-    user_exists = any(user_name in row for row in racers)
+    if user_name not in strangest_racers and len(strangest_racers)< max_racers:
+            strangest_racers[user_name.lower()] = True
+            logger.info(f"Added {user_name}")
+            write_to_file()
 
-    #if user_name is not in racer list
-    if not user_exists:
-        racers.append([user_name.casefold()])
-        # racers.append([user_name])
-
-                 
-    #now add some shit to csv
-    with open(racer_csv, 'w', newline='') as file:
-        writer = csv.writer(file)
-        writer.writerows(racers)
+def write_to_file():
+    duplicate = set()
+    with open(racer_csv, 'w') as file:
+        for user_name in strangest_racers.keys():
+            lowercase_name = user_name.lower()
+            if lowercase_name not in duplicate:
+                file.write(user_name.lower() + '\n')
+                duplicate.add(lowercase_name)
 
    
 
@@ -120,37 +120,8 @@ async def event_eventsub_notification_followV2(payload: eventsub.ChannelFollowDa
 
 @esbot.event()
 #this is how you pull the whos folloing me
-
-
 async def event_eventsub_subscribe_channel_follows_v2(payload: eventsub.ChannelFollowData) -> None:
     follows = payload.user.fetch_follow(to_user=_CHANNEL_NAME)
     #cant do it this way need token and autho of every viewer 
-
-    
-
-async def event_message(self, message):
-    message_content = message.content
-    user= message.author.name
-    
-    if "!remove" in message_content:
-            with open(racer_csv, "w", newline='') as file:
-                rows = list(csv.reader(file))
-                file.seek(0)
-                writer = csv.writer(file)
-                    
-                for row in rows:
-                # Check if the user's name is not in the row
-                    if user not in row:
-                        # Write the row back to the file
-                        writer.writerow(row)
-
-    # Open the file in write mode to truncate and remove remaining content
-    with open(racer_csv, "w", newline='') as file:
-        file.truncate()
-
-    # Print a message indicating the user has been removed
-    print(f"{user} has been removed from {racer_csv}.")
-    print(racer_csv)
-
         
 bot.run()
