@@ -88,24 +88,31 @@ bot.loop.run_until_complete(bot.__ainit__())
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
-    max_racers = 5
+    max_racers = 3
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )
     #read csv
-    if user_name not in strangest_racers and len(strangest_racers)< max_racers:
-            strangest_racers[user_name.lower()] = True
-            logger.info(f"Added {user_name.lower()}")
-            write_to_file()
+    # if len(strangest_racers)< max_racers:
+    #         strangest_racers[user_name.lower()] = True
+            
+
+    #set ditc to honor max_racer and add new racers who are true in strangest racer
+    if (sum (strangest_racers.values()) < max_racers) and (user_name.lower() not in strangest_racers.keys()):
+        strangest_racers[user_name.lower()] = True
+        logger.info(f"Added {user_name.lower()}")
+        write_to_file()
+    
 
 #stops the duplicate 
 def write_to_file():
     print (strangest_racers, "hey look at me ")
-    with open(racer_csv, 'a') as file:
+    with open(racer_csv, 'w') as file:
         for user_name in strangest_racers.keys():
-            lowercase_name = user_name.lower()
-            if lowercase_name not in duplicate and strangest_racers[user_name.lower()]:
+            if strangest_racers[user_name.lower()] == True:
                 file.write(user_name.lower() + '\n')
-                duplicate.add(lowercase_name)
+            #     lowercase_name = user_name.lower()
+            # if lowercase_name not in duplicate and strangest_racers[user_name.lower()]:
+            #     duplicate.add(lowercase_name)
 
    
 
