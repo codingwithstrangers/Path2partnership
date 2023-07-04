@@ -36,11 +36,16 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
-
+#dicts and global variables
 racer_csv = "the_strangest_racer.csv"
 strangest_racers = {}
+racers_removed = {}
+duplicate = set()
+with open (racer_csv, 'w') as file:
+    pass
 
 
+#this is the remove command 
 class Bot(commands.Bot):
     @commands.command()
     async def remove(self, ctx: commands.Context):
@@ -48,10 +53,10 @@ class Bot(commands.Bot):
         print(strangest_racers)
         user= ctx.author.name.lower()
         if user in strangest_racers:
-            del strangest_racers[user]
+            strangest_racers[user] = False
             write_to_file()
-            # Send a hello back!
-            await ctx.send(f'Ok Ok take yo last place havin ass on the {ctx.author.name}!')
+            # message sent if they are removed
+            await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
     
 
     def __init__(self):
@@ -75,13 +80,11 @@ class Bot(commands.Bot):
 
     async def event_ready(self):
         logger.info(f"Bot is ready!")
-
-    
     print('why my shit not working?')
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
-
+#this will set max users and count list and add users
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
@@ -91,15 +94,16 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
     #read csv
     if user_name not in strangest_racers and len(strangest_racers)< max_racers:
             strangest_racers[user_name.lower()] = True
-            logger.info(f"Added {user_name}")
+            logger.info(f"Added {user_name.lower()}")
             write_to_file()
 
+#stops the duplicate 
 def write_to_file():
-    duplicate = set()
-    with open(racer_csv, 'w') as file:
+    print (strangest_racers, "hey look at me ")
+    with open(racer_csv, 'a') as file:
         for user_name in strangest_racers.keys():
             lowercase_name = user_name.lower()
-            if lowercase_name not in duplicate:
+            if lowercase_name not in duplicate and strangest_racers[user_name.lower()]:
                 file.write(user_name.lower() + '\n')
                 duplicate.add(lowercase_name)
 
