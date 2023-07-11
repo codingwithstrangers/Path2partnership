@@ -39,5 +39,5 @@ Point system
 4.
 
 Losing points
-1. chatting per chat .5
-2.
+1. by landing on traps buying 500pts (boost makes you skip tile to avoid trap) 3 traps 1 space miniumium apart
+2. 

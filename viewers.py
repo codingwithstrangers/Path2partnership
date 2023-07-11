@@ -4,6 +4,7 @@ from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 import time
+import csv
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
 import chromedriver_autoinstaller
@@ -20,6 +21,8 @@ driver = webdriver.Chrome(executable_path=driver_path,options=options)
 
 #stream you want to monitor
 stream = "https://www.twitch.tv/codingwithstrangers/chat"
+
+
 
 #loop my shit duration of bot 
 duration = 180
@@ -77,8 +80,43 @@ for i in range(duration):
         for name in matching_names:
             file.write(f"{name}\n")
 
-    #pause the loop 
-    time.sleep(60)
-    
+#point for lurkers
+    get_lurker = 'lurker_score.txt'
+    lurker_points = 'lurker_points.csv'
 
+
+        # Read the existing names from the CSV file
+    existing_names = {}
+
+    with open(lurker_points, 'r') as file:
+        reader = csv.reader(file)
+        for row in reader:
+            if len(row) >=2:
+                existing_names[row[0]] = int(row[1])
+
+    # Read the new names from the text file
+    new_names = set()
+
+    with open(get_lurker, 'r') as file:
+        new_names.update(file.read().splitlines())
+
+    # # Determine the names that are not already in the CSV file
+    # unique_names = new_names - existing_names
+
+    # Append the unique names to the CSV file
+    with open(lurker_points, 'w', newline='') as file:
+        writer = csv.writer(file)
+        for name in existing_names:
+            if name in new_names:
+                existing_names[name] += 1 
+                writer.writerow([name, existing_names[name]])
+
+    #add the names and points to the csv
+    with open (lurker_points, 'a', newline='') as file:
+        writer = csv.writer(file)
+        for name in new_names - existing_names.keys():
+            writer.writerow([name, 1])
+
+    
+    time.sleep(60)
 driver.quit()

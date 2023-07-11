@@ -88,7 +88,7 @@ bot.loop.run_until_complete(bot.__ainit__())
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
-    max_racers = 3
+    max_racers = 30
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )
     #read csv
@@ -114,7 +114,10 @@ def write_to_file():
             # if lowercase_name not in duplicate and strangest_racers[user_name.lower()]:
             #     duplicate.add(lowercase_name)
 
-   
+###
+#Point System 
+
+#how to get point ever 60 seconds 
 
 @esbot.event()
 #this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)
@@ -136,3 +139,4 @@ async def event_eventsub_subscribe_channel_follows_v2(payload: eventsub.ChannelF
     #cant do it this way need token and autho of every viewer 
         
 bot.run()
+
