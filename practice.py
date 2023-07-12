@@ -57,7 +57,21 @@ class Bot(commands.Bot):
             write_to_file()
             # message sent if they are removed
             await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
+        else:
+            strangest_racers[user]
+            #message to user they are not in the list
+            await ctx.send(f'{ctx.author.name.lower()} Daddy Chill You Are Not in The List!')
+            
+    @commands.command()
+    #send message if they are in list 
+    async def response(self, ctx: commands.Context):
+        if ctx.author.name in strangest_racers:
+            await ctx.send(f'Welcome {ctx.author.name.lower()}! You are in the race.')
+        else:
+            await ctx.send('You need to use the perfect lurker channel point.')
+
     
+
 
     def __init__(self):
         super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
