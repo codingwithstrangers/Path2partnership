@@ -41,6 +41,7 @@ racer_csv = "the_strangest_racer.csv"
 strangest_racers = {}
 racers_removed = {}
 duplicate = set()
+false_lurkers = {}
 with open (racer_csv, 'w') as file:
     pass
 
@@ -52,12 +53,31 @@ class Bot(commands.Bot):
         global strangest_racers
         print(strangest_racers)
         user= ctx.author.name.lower()
-        if user in strangest_racers:
-            strangest_racers[user] = False
-            write_to_file()
-            # message sent if they are removed
-            await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
-    
+        #first check the false_lurker for true users
+        if user in false_lurkers:
+            await ctx.send(f'{ctx.author.name}! DADDY CHILL... you not in the race')
+            print(false_lurkers, 'Lurkers')
+            
+#this will add the user to the false lurker as true and mke the user false in the strangest racer
+        else:
+            if user in strangest_racers:
+                strangest_racers[user] = False
+                if not strangest_racers[user]:
+                    false_lurkers[user] = True
+                    write_to_file()
+                    # message sent if they are removed
+                    await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
+                    print(false_lurkers, 'my demon')
+        
+       
+            
+    @commands.command()
+    #send message if they are in list 
+    async def response(self, ctx: commands.Context):
+        if ctx.author.name.lower() in strangest_racers:
+            await ctx.send(f'Welcome {ctx.author.name.lower()}! You are in the race.')
+        else:
+            await ctx.send('You need to use the perfect lurker channel point.')
 
     def __init__(self):
         super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],

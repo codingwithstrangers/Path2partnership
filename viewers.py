@@ -25,7 +25,7 @@ stream = "https://www.twitch.tv/codingwithstrangers/chat"
 
 
 #loop my shit duration of bot 
-duration = 180
+duration = 500
 
 #the loop
 for i in range(duration):
