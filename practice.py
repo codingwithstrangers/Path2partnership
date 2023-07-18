@@ -40,105 +40,25 @@ esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callba
 #dicts and global variables
 racer_csv = "the_strangest_racer.csv"
 strangest_racers = {}
-
+lurkers_points = 'F:\Coding with Strangers\Path2partnership\lurker_points.csv' 
 racers_removed = {}
 duplicate = set()
 false_lurkers = {}
 with open (racer_csv, 'w') as file:
     pass
 
-#This will track user from 
-# class Bot(commands.Bot):
-    
-    
-
-    # def __init__(self):
-    #     # Initialise our Bot with our access token, prefix and a list of channels to join on boot...
-    #     # prefix can be a callable, which returns a list of strings or a string...
-    #     # initial_channels can also be a callable which returns a list of strings...
-        
-    #     super().__init__(token= _TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
-    #         nick = "lurkers_chats")
-
-    
-        # print(user_name)
-        # # list of users to exclude
-        # exclude_users = ['nightbot','streamlabs','codingwithstrangers']
-        # user_name = message.author.name.lower()
-        # chat = 
-        # print(user_name)
-    #     if user_name not in exclude_users:
-    #         if user_name not in self.lurkers_chats:
-    #              # Add the user's name to the lurkers_chats set
-    #             self.lurkers_chats[user_name] = True
-    # logger.info(lurkers_chats, 'Jimmy FTW')
-                
-        
-            
-                
-        
-        # #minus point from user for infractions
-        # # wight one bad word they wont get any point.
-
-        # for i in message.content.split():
-        #     bad_words = ["strainbreh", "fun", "easy", "try", "why", "mod", "my wife is black", "racing game"
-        #                  ,"blm" ]
-        #     if i.lower() in bad_words:   
-        #         if len(message.content) == 1:
-        #             self.lurkers_chats[message.author.name] -= 0.5  
-        #         else:
-        #             self.lurkers_chats[message.author.name] -= 1.5
-             
-        
-
-        # #check if user is subscriber or not
-        # #if they use a channel emote "channel emote and are subbed" they are getting .5 point
-        # subbed_chatters = ["coding32Thinkmybrother", "coding32Trunks", "coding32Whatmybrother", "coding32Zemi", "coding32Goten", "coding32Heart", "coding32Outofsewer"
-        #                    , "coding32sewer", "coding32Suscoding", "coding32Donny", "coding32What", "coding32really", "thank you", "thanks", "thank you"]
-        # for x in message.content.split():
-        #     if x in subbed_chatters and message.author.is_subscriber == 1:
-        #         self.points_by_chatter[message.author.name] += .5
-        #         break    
-        # print(self.points_by_chatter)
-        # if message.author.is_subscriber:
-        #     print("🌟")
-        # else:
-        #     print("🌘")
-        
-
-
-  
-            
-# bot = Bot()
-# bot.run()
-
-
 #this is the remove command 
 class Bot(commands.Bot):
-    @commands.command()
-    async def remove(self, ctx: commands.Context):
-        global strangest_racers
-        print(strangest_racers)
-        user= ctx.author.name.lower()
-        #first check the false_lurker for true users
-        if user in false_lurkers:
-            await ctx.send(f'{ctx.author.name}! DADDY CHILL... you are not in the race')
-            print(false_lurkers, 'Lurkers')
-
-#this will add the user to the false lurker as true and mke the user false in the strangest racer
-        else:
-            if user in strangest_racers:
-                strangest_racers[user] = False
-                if not strangest_racers[user]:
-                    false_lurkers[user] = True
-                    write_to_file()
-                    # message sent if they are removed
-                    await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
-                    print(false_lurkers, 'my demon')
-
+    
+    def __init__(self):
+        self.lurkers_chats = []
+        super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
+            nick = "Perfect_Lurker")
+        
     async def event_message(self, message): 
-        lurkers_chats = {}
-        exclude_users = ['nightbot','streamlabs','codingwithstrangers']
+        
+        
+        exclude_users = ['nightbot','streamlabs','codingwithstrangers', 'sockheadrps']
         if message.echo:
             return
 
@@ -150,17 +70,62 @@ class Bot(commands.Bot):
         print(user_name, 'are you ok Annie')
         if user_name not in exclude_users:
             if user_name not in self.lurkers_chats:
-                 # Add the user's name to the lurkers_chats set
-                self.lurkers_chats[user_name] = True
+                # Add the user's name to the lurkers_chats set
+                self.lurkers_chats.append(user_name)
+        await self.handle_commands(message)
+
+    def update_csv(self, lurker_points, lurkers_chats):
+        with open(lurkers_points, 'w+') as csv_file:
+            reader = csv.reader(csv_file)
+            rows = list(reader)
+            name_column = 0
+            point_column = 1
+
+            for row in rows:
+                name = row[name_column]
+                if name in self.lurkers_chats and name in row[name_column]:
+                    # if row[point_column]: #I want to check whats in column b
+                        row[point_column] = str(int(row[point_column]) -1)
+
+            write_to_file()
 
 
 
-    def __init__(self):
-        super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
-            nick = "Perfect_Lurker")
-        print("Test1")
-    def __init__(self):
-        super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
+
+
+
+
+        
+    @commands.command()
+    async def remove(self, ctx: commands.Context):
+        print('you slippery when wet mother lover')
+        # global strangest_racers
+        print(strangest_racers)
+        user= ctx.author.name.lower()
+        #first check the false_lurker for true users
+        if user in false_lurkers:
+            await ctx.send(f'{ctx.author.name}! DADDY CHILL... you are not in the race')
+            print(false_lurkers, 'Lurkers')
+
+    #this will add the user to the false lurker as true and mke the user false in the strangest racer
+        else:
+            if user in strangest_racers:
+                strangest_racers[user] = False
+                if not strangest_racers[user]:
+                    false_lurkers[user] = True
+                    write_to_file()
+                    # message sent if they are removed
+                    await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
+                    print(false_lurkers, 'my demon')
+
+
+    
+    # def __init__(self):
+    #     super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
+    # def __init__(self):
+    #     super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
+    #             nick = "Perfect_Lurker")
+   
 
     async def __ainit__(self) -> None:
         self.loop.create_task(esclient.listen(port=_ESCLIENT_PORT))
