@@ -1,10 +1,11 @@
 import logging; 
 import csv
 import os
+import time
 import twitchio
 import datetime
 from twitchio import Message
-from twitchio.ext import commands, eventsub
+from twitchio.ext import commands, eventsub, routines
 from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, BROADCASTER_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
 
 logging.basicConfig(level=logging.INFO) # Set this to DEBUG for more logging, INFO for regular logging
@@ -40,7 +41,7 @@ esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callba
 #dicts and global variables
 racer_csv = "the_strangest_racer.csv"
 strangest_racers = {}
-lurkers_points = 'F:\Coding with Strangers\Path2partnership\lurker_points.csv' 
+lurkers_points = 'lurker_points.csv' 
 racers_removed = {}
 duplicate = set()
 false_lurkers = {}
@@ -54,6 +55,7 @@ class Bot(commands.Bot):
         self.lurkers_chats = []
         super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker")
+        
         
     async def event_message(self, message): 
         
@@ -72,28 +74,62 @@ class Bot(commands.Bot):
             if user_name not in self.lurkers_chats:
                 # Add the user's name to the lurkers_chats set
                 self.lurkers_chats.append(user_name)
+        
+      
+        def update_csv():
+            talking_lurkers = self.lurkers_chats
+            #read csv to compare to talking lurkers
+            update_rows = []
+            with open (lurkers_points, 'r') as file:
+                reader = csv.reader(file)
+
+                #loopsome ish through the rows
+                for row in reader:
+                    name = row[0] #names mus be in column A
+                #loop for the score too
+                    if name == user_name:
+                        score = int(row[1])
+                        #subtract some ish if its more than 1
+                        score = max(score- 1 , 0)
+                        
+                        #update score
+                        row[1] = str(score)
+
+                        if name in talking_lurkers:
+                            #remove name from talking lurker
+                            talking_lurkers.remove(name)
+                    update_rows.append(row)
+                        #add updated row from above bck in
+                        # update_rows(row)
+                
+            #write this to csv
+            with open(lurkers_points, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(update_rows)
+        update_csv()
+
+    #run the function
         await self.handle_commands(message)
+    
+        
+        # def update_csv(self, lurker_points, lurkers_chats):
+        #     with open(lurkers_points, 'w+') as csv_file:
+        #         reader = csv.reader(csv_file)
+        #         rows = list(reader)
+        #         name_column = 0
+        #         point_column = 1
 
-    def update_csv(self, lurker_points, lurkers_chats):
-        with open(lurkers_points, 'w+') as csv_file:
-            reader = csv.reader(csv_file)
-            rows = list(reader)
-            name_column = 0
-            point_column = 1
+        #         for row in rows:
+        #             name = row[name_column]
+        #             if name in self.lurkers_chats and name in row[name_column]:
+        #                 if row[point_column]: #I want to check whats in column b
+        #                     row[point_column] = str(int(row[point_column]) -1)
+        #         with open(lurker_points, 'w', newline='') as csv_file:
+        #             writer = csv.writer(csv_file)
+        #             write_to_file()
 
-            for row in rows:
-                name = row[name_column]
-                if name in self.lurkers_chats and name in row[name_column]:
-                    # if row[point_column]: #I want to check whats in column b
-                        row[point_column] = str(int(row[point_column]) -1)
-
-            write_to_file()
-
-
-
-
-
-
+        # lurkers_chats = self.lurkers_chat       
+        # write_to_file(self, lurker_points, lurkers_chats)
 
         
     @commands.command()
@@ -104,7 +140,7 @@ class Bot(commands.Bot):
         user= ctx.author.name.lower()
         #first check the false_lurker for true users
         if user in false_lurkers:
-            await ctx.send(f'{ctx.author.name}! DADDY CHILL... you are not in the race')
+            await ctx.send(f'@{ctx.author.name}! DADDY CHILL... you are not in the race')
             print(false_lurkers, 'Lurkers')
 
     #this will add the user to the false lurker as true and mke the user false in the strangest racer
@@ -115,7 +151,7 @@ class Bot(commands.Bot):
                     false_lurkers[user] = True
                     write_to_file()
                     # message sent if they are removed
-                    await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
+                    await ctx.send(f'Ok Ok take yo last place havin ass on then @{ctx.author.name}!')
                     print(false_lurkers, 'my demon')
 
 
@@ -160,11 +196,11 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
     if (sum (strangest_racers.values()) < max_racers) and (user_name.lower() not in strangest_racers.keys()):
         strangest_racers[user_name.lower()] = True
         logger.info(f"Added {user_name.lower()}")
-        await channel.send(f'{payload.data.user.name.lower()}, Start Your Mother Loving Engines!! You are in the race Now!')
+        await channel.send(f'@{payload.data.user.name.lower()}, Start Your Mother Loving Engines!! You are in the race Now!')
         write_to_file()
     #send a message from the bot
     else:
-        logger.info(f'{user_name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother')
+        logger.info(f'@{user_name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother')
         await channel.send(f'{payload.data.user.name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother ') 
  
 
