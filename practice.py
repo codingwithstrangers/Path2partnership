@@ -202,7 +202,7 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
     else:
         logger.info(f'@{user_name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother')
         await channel.send(f'{payload.data.user.name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother ') 
- 
+        
 
 
 #stops the duplicate 

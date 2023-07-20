@@ -1,9 +1,13 @@
 import logging; 
 import csv
 import os
+import time
+from typing import List
 import twitchio
 import datetime
+from twitchio import Message, Client
 from twitchio.ext import commands, eventsub
+from twitchio.user import User
 from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, BROADCASTER_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
 
 logging.basicConfig(level=logging.INFO) # Set this to DEBUG for more logging, INFO for regular logging
@@ -36,55 +40,136 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
+client = Client(token=_TOKEN)
 #dicts and global variables
 racer_csv = "the_strangest_racer.csv"
 strangest_racers = {}
+lurkers_points = 'lurker_points.csv' 
 racers_removed = {}
 duplicate = set()
 false_lurkers = {}
 with open (racer_csv, 'w') as file:
     pass
 
-
 #this is the remove command 
 class Bot(commands.Bot):
+    
+    def __init__(self):
+        self.lurkers_chats = []
+        super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
+            nick = "Perfect_Lurker")
+        
+        
+    async def event_message(self, message): 
+        
+        
+        exclude_users = ['nightbot','streamlabs','codingwithstrangers', 'sockheadrps']
+        if message.echo:
+            return
+
+        # Print the contents of our message to console...
+        print(message.content.encode("utf-8"))
+        print(message.author.name)
+        user_name = message.author.name.lower()
+        
+        print(user_name, 'are you ok Annie')
+        if user_name not in exclude_users:
+            if user_name not in self.lurkers_chats:
+                # Add the user's name to the lurkers_chats set
+                self.lurkers_chats.append(user_name)
+        
+      
+        def update_csv():
+            talking_lurkers = self.lurkers_chats
+            #read csv to compare to talking lurkers
+            update_rows = []
+            with open (lurkers_points, 'r') as file:
+                reader = csv.reader(file)
+
+                #loopsome ish through the rows
+                for row in reader:
+                    name = row[0] #names mus be in column A
+                #loop for the score too
+                    if name == user_name:
+                        score = int(row[1])
+                        #subtract some ish if its more than 1
+                        score = max(score- 1 , 0)
+                        
+                        #update score
+                        row[1] = str(score)
+
+                        if name in talking_lurkers:
+                            #remove name from talking lurker
+                            talking_lurkers.remove(name)
+                    update_rows.append(row)
+                        #add updated row from above bck in
+                        # update_rows(row)
+                
+            #write this to csv
+            with open(lurkers_points, 'w', newline='') as file:
+                writer = csv.writer(file)
+                writer.writerows(update_rows)
+        update_csv()
+
+        await self.handle_commands(message)
+
+    #get images of users in race
+   
+
+
+        
+    
+        
+        # def update_csv(self, lurker_points, lurkers_chats):
+        #     with open(lurkers_points, 'w+') as csv_file:
+        #         reader = csv.reader(csv_file)
+        #         rows = list(reader)
+        #         name_column = 0
+        #         point_column = 1
+
+        #         for row in rows:
+        #             name = row[name_column]
+        #             if name in self.lurkers_chats and name in row[name_column]:
+        #                 if row[point_column]: #I want to check whats in column b
+        #                     row[point_column] = str(int(row[point_column]) -1)
+        #         with open(lurker_points, 'w', newline='') as csv_file:
+        #             writer = csv.writer(csv_file)
+        #             write_to_file()
+
+        # lurkers_chats = self.lurkers_chat       
+        # write_to_file(self, lurker_points, lurkers_chats)
+
+        
     @commands.command()
     async def remove(self, ctx: commands.Context):
-        global strangest_racers
+        print('you slippery when wet mother lover')
+        # global strangest_racers
         print(strangest_racers)
         user= ctx.author.name.lower()
         #first check the false_lurker for true users
         if user in false_lurkers:
-            await ctx.send(f'{ctx.author.name}! DADDY CHILL... you not in the race')
+            await ctx.send(f'@{ctx.author.name}! DADDY CHILL... you are not in the race')
             print(false_lurkers, 'Lurkers')
-            
-#this will add the user to the false lurker as true and mke the user false in the strangest racer
+
+    #this will add the user to the false lurker as true and mke the user false in the strangest racer
         else:
             if user in strangest_racers:
-                strangest_racers[user] = False
-                if not strangest_racers[user]:
-                    false_lurkers[user] = True
-                    write_to_file()
-                    # message sent if they are removed
-                    await ctx.send(f'Ok Ok take yo last place havin ass on then {ctx.author.name}!')
-                    print(false_lurkers, 'my demon')
-        
-       
-            
-    @commands.command()
-    #send message if they are in list 
-    async def response(self, ctx: commands.Context):
-        if ctx.author.name.lower() in strangest_racers:
-            await ctx.send(f'Welcome {ctx.author.name.lower()}! You are in the race.')
-        else:
-            await ctx.send('You need to use the perfect lurker channel point.')
+                strangest_racers[user]['is_available'] = False
+                # if not strangest_racers[user]:
+                false_lurkers[user]= True
+                write_to_file()
+                # message sent if they are removed
+                await ctx.send(f'Ok Ok take yo last place havin ass on then @{ctx.author.name}!')
+                print(false_lurkers, 'my demon')
 
-    def __init__(self):
-        super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
-            nick = "Perfect_Lurker")
-        print("Test1")
-    def __init__(self):
-        super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
+
+    
+    # def __init__(self):
+    #     super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
+    # def __init__(self):
+    #     super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
+    #             nick = "Perfect_Lurker")
+   
 
     async def __ainit__(self) -> None:
         self.loop.create_task(esclient.listen(port=_ESCLIENT_PORT))
@@ -104,40 +189,53 @@ class Bot(commands.Bot):
 bot = Bot()
 bot.loop.run_until_complete(bot.__ainit__())
 
+
+
 #this will set max users and count list and add users
 @esbot.event()
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
+    channel = bot.get_channel('codingwithstrangers')
     max_racers = 30
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
-     )
-    #read csv
-    # if len(strangest_racers)< max_racers:
-    #         strangest_racers[user_name.lower()] = True
-            
+     )         
 
     #set ditc to honor max_racer and add new racers who are true in strangest racer
-    if (sum (strangest_racers.values()) < max_racers) and (user_name.lower() not in strangest_racers.keys()):
-        strangest_racers[user_name.lower()] = True
+    avialable_racers = 0
+    for values in strangest_racers.values():
+        if values['is_available']:
+            avialable_racers+=1
+    if (avialable_racers < max_racers) and (user_name.lower() not in strangest_racers.keys()):
+        #this is how we added the image url and to the dict.
+        user_profiles = await client.fetch_users(names=[user_name])
+        logger.info(user_profiles[0].profile_image)
+        strangest_racers[user_name.lower()] = {'is_available':True, 'image_url':user_profiles[0].profile_image}
+        '''
+        { heeer:  { is_aviable:True, image_url: "string of url" },
+            Caddac: { is_aviable:True, image_url: "string of url" }}
+        strangest_racers['heer']['image_url'] 
+
+
+        '''
+        
         logger.info(f"Added {user_name.lower()}")
+        await channel.send(f'@{payload.data.user.name.lower()}, Start Your Mother Loving Engines!! You are in the race Now!')
         write_to_file()
-    
+    #send a message from the bot
+    else:
+        logger.info(f'@{user_name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother')
+        await channel.send(f'{payload.data.user.name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother ') 
+ 
+
 
 #stops the duplicate 
 def write_to_file():
     print (strangest_racers, "hey look at me ")
     with open(racer_csv, 'w') as file:
         for user_name in strangest_racers.keys():
-            if strangest_racers[user_name.lower()] == True:
-                file.write(user_name.lower() + '\n')
-            #     lowercase_name = user_name.lower()
-            # if lowercase_name not in duplicate and strangest_racers[user_name.lower()]:
-            #     duplicate.add(lowercase_name)
+            if strangest_racers[user_name.lower()]['is_available'] == True:
+                file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['image_url']}\n")
 
-###
-#Point System 
-
-#how to get point ever 60 seconds 
 
 @esbot.event()
 #this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)

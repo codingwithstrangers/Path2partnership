@@ -41,3 +41,17 @@ Point system
 Losing points
 1. by landing on traps buying 500pts (boost makes you skip tile to avoid trap) 3 traps 1 space miniumium apart
 2. 
+
+
+PY Game
+What do we want to do 
+1. make a mini map
+2. put up to 15
+3. top 3 people get crowns accordingly
+4.the person not moving the most (wrf does this mean) get chain and ball
+5. traps on spaces flash red 
+6. animation for damage, speed, holding items and sleep
+
+How it works
+1. racers in csv will start at starting line and never go into negative
+2. 
