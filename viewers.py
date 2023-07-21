@@ -69,11 +69,14 @@ for i in range(duration):
 #compare each file
     with open("All_viewers.txt", 'r') as file1:
         All_viewers = file1.read().splitlines()
-    with open(racer_csv, 'r')as file2:
-        the_strangest_racer= file2.read().splitlines()
+    with open(racer_csv, 'r') as reader:
+        lines = reader.read().splitlines()
+        racers = [l.split(',')[0] for l in lines] # split each line on comma and get the name (the first column)
+    # with open(racer_csv, 'r')as file2:
+    #     the_strangest_racer= file2.read().splitlines()
 
     #check booth list for match
-    matching_names = set(All_viewers) & set(the_strangest_racer)
+    matching_names = set(All_viewers) & set(racers)
 
       # Write the matching names to the "lurker_score.txt" file
     with open("lurker_score.txt", "w") as file:

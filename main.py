@@ -110,6 +110,7 @@ class Bot(commands.Bot):
                 writer = csv.writer(file)
                 writer.writerows(update_rows)
         update_csv()
+# file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['image_url']}\n")
 
         await self.handle_commands(message)
 
