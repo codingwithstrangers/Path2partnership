@@ -3,6 +3,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.chrome.options import Options
 from selenium.webdriver.support.wait import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
+import os
 import time
 import csv
 from selenium.webdriver.support.ui import Select
@@ -25,7 +26,11 @@ stream = "https://www.twitch.tv/codingwithstrangers/chat"
 
 
 #loop my shit duration of bot 
-duration = 500
+duration = 180
+
+#this wipes file
+with open ('lurker_points.csv', 'w') as file:
+    pass
 
 #the loop
 for i in range(duration):
@@ -69,56 +74,30 @@ for i in range(duration):
 #compare each file
     with open("All_viewers.txt", 'r') as file1:
         All_viewers = file1.read().splitlines()
-    with open(racer_csv, 'r') as reader:
-        lines = reader.read().splitlines()
-        racers = [l.split(',')[0] for l in lines] # split each line on comma and get the name (the first column)
-    # with open(racer_csv, 'r')as file2:
-    #     the_strangest_racer= file2.read().splitlines()
+        # All_viewers += ['codingwithstrangers']
+    with open(racer_csv, 'r') as file:
+        lines = csv.reader(file)
+        racer_url = {l[0]: l[1] for l in lines}
+        racers = list(racer_url.keys()) 
+
 
     #check booth list for match
-    matching_names = set(All_viewers) & set(racers)
-
-      # Write the matching names to the "lurker_score.txt" file
-    with open("lurker_score.txt", "w") as file:
-        for name in matching_names:
-            file.write(f"{name}\n")
-
-#point for lurkers
-    get_lurker = 'lurker_score.txt'
+    all_racers_names = set(All_viewers) & set(racers)
     lurker_points = 'lurker_points.csv'
-
-
-        # Read the existing names from the CSV file
-    existing_names = {}
-
     with open(lurker_points, 'r') as file:
         reader = csv.reader(file)
-        for row in reader:
-            if len(row) >=2:
-                existing_names[row[0]] = int(row[1])
+        existing_racers = {l[0]: {'score':l[1],'url':l[2]} for l in reader}
+    #run over racers adding or updating existing racers
+    real_existing_racer = {}
+    for racer in all_racers_names:
+        score = int(existing_racers[racer]['score']) +1 if racer in existing_racers else 0
+        real_existing_racer[racer] = {'score':score,'url':racer_url[racer]}
+            
 
-    # Read the new names from the text file
-    new_names = set()
-
-    with open(get_lurker, 'r') as file:
-        new_names.update(file.read().splitlines())
-
-    # # Determine the names that are not already in the CSV file
-    # unique_names = new_names - existing_names
-
-    # Append the unique names to the CSV file
-    with open(lurker_points, 'w', newline='') as file:
-        writer = csv.writer(file)
-        for name in existing_names:
-            if name in new_names:
-                existing_names[name] += 1 
-            writer.writerow([name, existing_names[name]])
-
-    #add the names and points to the csv
-    with open (lurker_points, 'a', newline='') as file:
-        writer = csv.writer(file)
-        for name in new_names - existing_names.keys():
-            writer.writerow([name, 1])
+      # Write the matching names to the "lurker_score.txt" file
+    with open("lurker_points.csv", "w") as file:
+        for name in real_existing_racer.keys():
+            file.write(f"{name},{real_existing_racer[name]['score']},{real_existing_racer[name]['url']}\n")
 
     
     time.sleep(60)

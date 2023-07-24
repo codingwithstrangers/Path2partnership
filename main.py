@@ -206,6 +206,8 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
     for values in strangest_racers.values():
         if values['is_available']:
             avialable_racers+=1
+    print(strangest_racers, "wf did I do")
+
     if (avialable_racers < max_racers) and (user_name.lower() not in strangest_racers.keys()):
         #this is how we added the image url and to the dict.
         user_profiles = await client.fetch_users(names=[user_name])
