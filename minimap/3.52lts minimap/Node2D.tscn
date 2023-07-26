@@ -1,0 +1,23 @@
+[gd_scene load_steps=4 format=2]
+
+[ext_resource path="res://Sprite.gd" type="Script" id=1]
+[ext_resource path="res://demo bg - Copy.png" type="Texture" id=2]
+
+[sub_resource type="Curve2D" id=1]
+_data = {
+"points": PoolVector2Array(  )
+}
+
+[node name="Node2D" type="Node2D"]
+
+[node name="DemoBg-Copy" type="Sprite" parent="."]
+position = Vector2( 537, 698 )
+texture = ExtResource( 2 )
+
+[node name="Path2D" type="Path2D" parent="."]
+curve = SubResource( 1 )
+
+[node name="PathFollow2D" type="PathFollow2D" parent="Path2D"]
+
+[node name="Sprite" type="Sprite" parent="Path2D/PathFollow2D"]
+script = ExtResource( 1 )

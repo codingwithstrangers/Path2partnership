@@ -1,12 +1,13 @@
-[gd_scene load_steps=6 format=3 uid="uid://corcw8alcmnr6"]
+[gd_scene load_steps=7 format=3 uid="uid://corcw8alcmnr6"]
 
 [ext_resource type="Script" path="res://Area2D.gd" id="2_640ml"]
+[ext_resource type="Script" path="res://PathFollow2D.gd" id="2_b8xp4"]
 [ext_resource type="Texture2D" uid="uid://bsl1dvk0574xm" path="res://demo bg.png" id="2_qai1a"]
 [ext_resource type="Texture2D" uid="uid://dyf7l5xow62rx" path="res://icon.svg" id="3_ag6jv"]
 
 [sub_resource type="Curve2D" id="Curve2D_dewcc"]
 _data = {
-"points": PackedVector2Array(0, 0, 0, 0, 118, 148, 0, 0, 0, 0, 116, 665, 0, 0, 0, 0, 835, 663, 0, 0, 0, 0, 834, 148, 0, 0, 0, 0, 118, 148)
+"points": PackedVector2Array(0, 0, 0, 0, 118, 148, 0, 0, 0, 0, 114, 669, 0, 0, 0, 0, 834, 669, 0, 0, 0, 0, 835, 146, 0, 0, 0, 0, 118, 148)
 }
 point_count = 5
 
@@ -24,13 +25,13 @@ curve = SubResource("Curve2D_dewcc")
 [node name="PathFollow2D" type="PathFollow2D" parent="Path2D"]
 position = Vector2(118, 148)
 rotation = -1.57274
-scale = Vector2(1, 1)
+progress = 2481.02
 rotates = false
+script = ExtResource("2_b8xp4")
 
 [node name="Area2D" type="Area2D" parent="Path2D/PathFollow2D"]
 position = Vector2(148.229, -117.712)
 rotation = 1.57274
-scale = Vector2(1, 1)
 
 [node name="CollisionShape2D" type="CollisionShape2D" parent="Path2D/PathFollow2D/Area2D"]
 shape = SubResource("WorldBoundaryShape2D_3y20p")
@@ -40,3 +41,7 @@ rotation = 1.5708
 scale = Vector2(0.336, 0.336)
 texture = ExtResource("3_ag6jv")
 script = ExtResource("2_640ml")
+
+[node name="Polygon2D" type="Polygon2D" parent="Path2D/PathFollow2D"]
+position = Vector2(148.229, -117.712)
+rotation = 1.57274

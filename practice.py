@@ -2,10 +2,12 @@ import logging;
 import csv
 import os
 import time
+from typing import List
 import twitchio
 import datetime
-from twitchio import Message
-from twitchio.ext import commands, eventsub, routines
+from twitchio import Message, Client
+from twitchio.ext import commands, eventsub
+from twitchio.user import User
 from configuration import CLIENT_ID, CLIENT_SECRET, TOKEN, CALLBACK, CHANNEL_NAME, BROADCASTER_ID, MODERATOR_ID, WEBHOOK_SECRET, ESCLIENT_PORT
 
 logging.basicConfig(level=logging.INFO) # Set this to DEBUG for more logging, INFO for regular logging
@@ -38,6 +40,7 @@ _ESCLIENT_PORT = ESCLIENT_PORT
 
 esbot = commands.Bot.from_client_credentials(client_id=_CLIENT_ID, client_secret=_CLIENT_SECRET)
 esclient = eventsub.EventSubClient(esbot, webhook_secret=_WEBHOOK_SECRET, callback_route=_CALLBACK)#, token=_TOKEN)
+client = Client(token=_TOKEN)
 #dicts and global variables
 racer_csv = "the_strangest_racer.csv"
 strangest_racers = {}
@@ -107,31 +110,10 @@ class Bot(commands.Bot):
                 writer = csv.writer(file)
                 writer.writerows(update_rows)
         update_csv()
+# file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['image_url']}\n")
 
-    #run the function
         await self.handle_commands(message)
-    
-        
-        # def update_csv(self, lurker_points, lurkers_chats):
-        #     with open(lurkers_points, 'w+') as csv_file:
-        #         reader = csv.reader(csv_file)
-        #         rows = list(reader)
-        #         name_column = 0
-        #         point_column = 1
 
-        #         for row in rows:
-        #             name = row[name_column]
-        #             if name in self.lurkers_chats and name in row[name_column]:
-        #                 if row[point_column]: #I want to check whats in column b
-        #                     row[point_column] = str(int(row[point_column]) -1)
-        #         with open(lurker_points, 'w', newline='') as csv_file:
-        #             writer = csv.writer(csv_file)
-        #             write_to_file()
-
-        # lurkers_chats = self.lurkers_chat       
-        # write_to_file(self, lurker_points, lurkers_chats)
-
-        
     @commands.command()
     async def remove(self, ctx: commands.Context):
         print('you slippery when wet mother lover')
@@ -146,21 +128,13 @@ class Bot(commands.Bot):
     #this will add the user to the false lurker as true and mke the user false in the strangest racer
         else:
             if user in strangest_racers:
-                strangest_racers[user] = False
-                if not strangest_racers[user]:
-                    false_lurkers[user] = True
-                    write_to_file()
-                    # message sent if they are removed
-                    await ctx.send(f'Ok Ok take yo last place havin ass on then @{ctx.author.name}!')
-                    print(false_lurkers, 'my demon')
-
-
-    
-    # def __init__(self):
-    #     super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
-    # def __init__(self):
-    #     super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
-    #             nick = "Perfect_Lurker")
+                strangest_racers[user]['is_available'] = False
+                # if not strangest_racers[user]:
+                false_lurkers[user]= True
+                write_to_file()
+                # message sent if they are removed
+                await ctx.send(f'Ok Ok take yo last place havin ass on then @{ctx.author.name}!')
+                print(false_lurkers, 'my demon')
    
 
     async def __ainit__(self) -> None:
@@ -193,8 +167,19 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
      )         
 
     #set ditc to honor max_racer and add new racers who are true in strangest racer
-    if (sum (strangest_racers.values()) < max_racers) and (user_name.lower() not in strangest_racers.keys()):
-        strangest_racers[user_name.lower()] = True
+    avialable_racers = 0
+    for values in strangest_racers.values():
+        if values['is_available']:
+            avialable_racers+=1
+    print(strangest_racers, "wf did I do")
+
+    if (avialable_racers < max_racers) and (user_name.lower() not in strangest_racers.keys()):
+        #this is how we added the image url and to the dict.
+        user_profiles = await client.fetch_users(names=[user_name])
+        logger.info(user_profiles[0].profile_image)
+        strangest_racers[user_name.lower()] = {'is_available':True, 'image_url':user_profiles[0].profile_image}
+      
+        
         logger.info(f"Added {user_name.lower()}")
         await channel.send(f'@{payload.data.user.name.lower()}, Start Your Mother Loving Engines!! You are in the race Now!')
         write_to_file()
@@ -202,7 +187,7 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
     else:
         logger.info(f'@{user_name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother')
         await channel.send(f'{payload.data.user.name.lower()}, hey sorry you can only enter the race once per stream coding32Whatmybrother ') 
-        
+ 
 
 
 #stops the duplicate 
@@ -210,8 +195,8 @@ def write_to_file():
     print (strangest_racers, "hey look at me ")
     with open(racer_csv, 'w') as file:
         for user_name in strangest_racers.keys():
-            if strangest_racers[user_name.lower()] == True:
-                file.write(user_name.lower() + '\n')
+            if strangest_racers[user_name.lower()]['is_available'] == True:
+                file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['image_url']}\n")
 
 
 @esbot.event()
