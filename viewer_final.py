@@ -29,8 +29,8 @@ stream = "https://www.twitch.tv/codingwithstrangers/chat"
 duration = 180
 
 #this wipes file
-with open ('lurker_points.csv', 'w') as file:
-    pass
+# with open ('lurker_points.csv', 'w') as file:
+#     pass
 
 #the loop
 for i in range(duration):

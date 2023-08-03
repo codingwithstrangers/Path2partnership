@@ -14,6 +14,7 @@ func _ready():
 func _physics_process(delta):
 	current_point += 1
 	path_follow.progress_ratio = current_point /1000.0
+	pass
 	
 	
 func lurker():
@@ -34,7 +35,9 @@ func download_image():
 	print("Yo mother lover")
 
 	# Perform the HTTP request. The URL below returns a PNG image as of writing.
-	var error = http_request.request("https://static-cdn.jtvnw.net/jtv_user_pictures/e1cc6f85-5198-4cc0-b60b-ad3a42eaa3ab-profile_image-300x300.png")
+	var csv_pix = csv_to_dict()
+	csv_pix['thestrangest_bot']['image_url']
+	var error = http_request.request("image_url")
 	if error != OK:
 		push_error("An error occurred in the HTTP request.")		
 		print('is the download working')
