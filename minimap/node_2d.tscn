@@ -28,7 +28,6 @@ offset_right = -436.5
 offset_bottom = -387.0
 grow_horizontal = 2
 grow_vertical = 2
-text = "some text"
 horizontal_alignment = 1
 vertical_alignment = 1
 

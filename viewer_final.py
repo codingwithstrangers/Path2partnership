@@ -74,7 +74,7 @@ for i in range(duration):
 #compare each file
     with open("All_viewers.txt", 'r') as file1:
         All_viewers = file1.read().splitlines()
-        # All_viewers += ['codingwithstrangers']
+        All_viewers += ['codingwithstrangers']
     with open(racer_csv, 'r') as file:
         lines = csv.reader(file)
         racer_url = {l[0]: l[1] for l in lines}
@@ -94,7 +94,7 @@ for i in range(duration):
         real_existing_racer[racer] = {'score':score,'url':racer_url[racer]}
             
 
-      # Write the matching names to the "lurker_score.txt" file
+      # Write the matching names to the "lurker_score.csv" file
     with open("lurker_points.csv", "w") as file:
         for name in real_existing_racer.keys():
             file.write(f"{name},{real_existing_racer[name]['score']},{real_existing_racer[name]['url']}\n")

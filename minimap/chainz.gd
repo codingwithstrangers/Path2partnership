@@ -9,6 +9,7 @@ func _ready():
 	add_child(timer)
 	timer.timeout.connect(not_ready)
 	not_ready()
+	image_type('')
 	
 
 func not_ready():
@@ -32,7 +33,7 @@ func not_ready():
 			
 			#for every user make 2d sprite
 			load_image_into_sprite(image_url,sprite)
-			sprite.scale = Vector2(0.25,0.25)
+			sprite.scale = Vector2(0.20,0.20)
 			
 			#use line 23 to make changes and add to child 
 			var score = Label.new()
@@ -41,6 +42,21 @@ func not_ready():
 			score.scale = Vector2(5,5)
 			score.position.y = -250
 			score.position.x = -150
+			
+			score = Label.new()
+			sprite.add_child(score)
+
+			score.scale = Vector2(5, 5)
+			score.position.y = -250
+			score.position.x = -150
+
+			# Create a Stroke instance and configure it
+#			Color outline_color = Color(1, 1, 1, 1)
+#			score.get_outlin
+#		
+			
+
+			
 			
 			
 			#adding user to global user and the nods we want to update in the future
@@ -58,12 +74,6 @@ func not_ready():
 			user_info_dict[existing_user]['follow'].queue_free()
 			user_info_dict.erase(existing_user)
 			
-		
-	
-		
-		
-		
-		
 	
 #	var sprite1 = Sprite2D.new()
 #	sprite1.name = "Bruh1"
@@ -89,6 +99,17 @@ func csv_to_dict():
 	
 	
 	
+func image_type(url: String) ->String:
+	var split = url.split('.')
+	if  split.size() > 1:
+		var file_extentsion = split[split.size() - 1]
+		print (file_extentsion)
+		return file_extentsion.to_lower()
+		
+	else:
+		return "If you are reading this its already to late"
+	
+	
 	
 func load_image_into_sprite(url: String, sprite: Sprite2D):
 	var http_request = HTTPRequest.new()
@@ -97,20 +118,30 @@ func load_image_into_sprite(url: String, sprite: Sprite2D):
 	var error = http_request.request(url)
 	if error != OK:
 		push_error("An error occurred in the HTTP request.")
+		
 
 func _on_HTTPRequest_request_completed(result, response_code, headers, body, sprite, url, http_request):
 	if response_code == 200:
+		var error = FAILED
+		var url_ext = image_type(url)
 		var image = Image.new()
-		var error = image.load_png_from_buffer(body)
-		
+		if url_ext == 'jpg':
+			error = image.load_jpg_from_buffer(body)
+			
+		elif url_ext == 'png':
+			error = image.load_png_from_buffer(body)
+			
+		elif url_ext == 'jpeg':
+			error = image.load_jpg_from_buffer(body)
+			print("loading jpeg", error)
+			
 		if error == OK:
 			print("Downloaded " + url + " successfully")
 			var texture = ImageTexture.create_from_image(image)
-			
 			# Apply the texture to the sprite
 			var target_sprite = sprite as Sprite2D
 			target_sprite.texture = texture
-#			add_child(target_sprite)
+			add_child(target_sprite)
 			
 		else:
 			print("Failed to load image from", sprite)
@@ -119,3 +150,4 @@ func _on_HTTPRequest_request_completed(result, response_code, headers, body, spr
 	
 	#delete http_request node once done
 	http_request.queue_free()
+	

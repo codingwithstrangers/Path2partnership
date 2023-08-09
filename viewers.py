@@ -26,7 +26,7 @@ stream = "https://www.twitch.tv/codingwithstrangers/chat"
 
 
 #loop my shit duration of bot 
-duration = 180
+duration = 380
 
 #this wipes file
 # with open ('lurker_points.csv', 'w') as file:
@@ -64,41 +64,51 @@ for i in range(duration):
     total_list.extend(vips.text.split('\n'))
 
     #prints List of total viewers 
-    print(total_list)
-    racer_csv = "the_strangest_racer.csv"
-# create first text file
-    with open("All_viewers.txt", 'w') as file:
-        lower_caseshit = '\n'.join(total_list).lower()
-        file.write(lower_caseshit)
-   
-#compare each file
-    with open("All_viewers.txt", 'r') as file1:
-        All_viewers = file1.read().splitlines()
-        # All_viewers += ['codingwithstrangers']
-    with open(racer_csv, 'r') as file:
-        lines = csv.reader(file)
-        racer_url = {l[0]: l[1] for l in lines}
-        racers = list(racer_url.keys()) 
-
-
-    #check booth list for match
-    all_racers_names = set(All_viewers) & set(racers)
-    lurker_points = 'lurker_points.csv'
-    with open(lurker_points, 'r') as file:
-        reader = csv.reader(file)
-        existing_racers = {l[0]: {'score':l[1],'url':l[2]} for l in reader}
-    #run over racers adding or updating existing racers
-    real_existing_racer = {}
-    for racer in all_racers_names:
-        score = int(existing_racers[racer]['score']) +1 if racer in existing_racers else 0
-        real_existing_racer[racer] = {'score':score,'url':racer_url[racer]}
-            
-
-      # Write the matching names to the "lurker_score.txt" file
-    with open("lurker_points.csv", "w") as file:
-        for name in real_existing_racer.keys():
-            file.write(f"{name},{real_existing_racer[name]['score']},{real_existing_racer[name]['url']}\n")
-
+    print('the total list',total_list)
     
+
+    #make a func that opens csv and puts it in to a dict
+    racer_csv = "the_strangest_racer.csv"
+    all_viewers = [item.lower() for item in total_list]
+    def open_csv ():
+        racer_info = {}
+        perfect_lurker = {}
+        existing_lurker = {}
+        with open (racer_csv,'r') as file:
+            lines = csv.reader(file)
+            racer_info ={l[0]: l[1] for l in lines}
+            perfect_lurker.update(racer_info)
+            # print('perfect_lurker')
+            # print(perfect_lurker)
+        
+        existing_lurker = {key: value for key, value in perfect_lurker.items() if key.lower() in all_viewers}
+        print('the existing lurkers', existing_lurker) 
+
+        lurker_points = 'lurker_points.csv'
+        with open(lurker_points, 'r') as file:
+            reader = csv.reader(file)
+            existing_racers = {l[0]: {'score':l[1],'url':l[2]} for l in reader}
+
+        #add score and combine dict for final 
+        lurker_score = {}
+        for racer in existing_lurker:
+            score = int(existing_racers[racer]['score'])+1 if racer in existing_racers else 0
+            lurker_score [racer] = {'score':score,'url':racer_info[racer]}
+
+          # Write the matching names to the "lurker_score.csv" file
+        # with open("lurker_points.csv", "w") as file:
+        #     for name in lurker_score.keys():
+        #         final_output = {name},{lurker_score[name]['score']},{lurker_score[name]['url']}
+        #         print(f'final output',final_output)
+        #         file.write(final_output + '\n')
+        # 
+        # 
+        with open("lurker_points.csv", "w") as file:
+            for name in lurker_score.keys():
+                final_output = f"{name},{lurker_score[name]['score']},{lurker_score[name]['url']}"
+                print('final output:', final_output)
+                file.write(final_output + '\n')
+    
+    open_csv()
     time.sleep(60)
 driver.quit()
