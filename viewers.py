@@ -70,7 +70,15 @@ for i in range(duration):
     #make a func that opens csv and puts it in to a dict
     racer_csv = "the_strangest_racer.csv"
     all_viewers = [item.lower() for item in total_list]
+    lurker_points_csv = 'lurker_points.csv'
+   
     def open_csv ():
+    # create first text file
+        with open("All_viewers.txt", 'w') as file:
+            lower_caseshit = '\n'.join(total_list).lower()
+            file.write(lower_caseshit)
+
+    
         racer_info = {}
         perfect_lurker = {}
         existing_lurker = {}
@@ -82,7 +90,7 @@ for i in range(duration):
             # print(perfect_lurker)
         
         existing_lurker = {key: value for key, value in perfect_lurker.items() if key.lower() in all_viewers}
-        print('the existing lurkers', existing_lurker) 
+        # print('the existing lurkers', existing_lurker) 
 
         lurker_points = 'lurker_points.csv'
         with open(lurker_points, 'r') as file:
@@ -90,19 +98,20 @@ for i in range(duration):
             existing_racers = {l[0]: {'score':l[1],'url':l[2]} for l in reader}
 
         #add score and combine dict for final 
+        
+        # for racer in existing_lurker:
+        #     score = int(existing_racers[racer]['score'])+1 if racer in existing_racers else 0
+        #     lurker_score[racer] = {'score': score, 'url': racer_info.get(racer, '')}
         lurker_score = {}
         for racer in existing_lurker:
-            score = int(existing_racers[racer]['score'])+1 if racer in existing_racers else 0
-            lurker_score [racer] = {'score':score,'url':racer_info[racer]}
+            if racer in existing_racers:
+                score = int(existing_racers[racer]['score']) + 1
+            else:
+                if racer in racer_info:
+                    score = +0
+            lurker_score[racer] = {'score': score, 'url': racer_info.get(racer, '')}
 
-          # Write the matching names to the "lurker_score.csv" file
-        # with open("lurker_points.csv", "w") as file:
-        #     for name in lurker_score.keys():
-        #         final_output = {name},{lurker_score[name]['score']},{lurker_score[name]['url']}
-        #         print(f'final output',final_output)
-        #         file.write(final_output + '\n')
-        # 
-        # 
+     
         with open("lurker_points.csv", "w") as file:
             for name in lurker_score.keys():
                 final_output = f"{name},{lurker_score[name]['score']},{lurker_score[name]['url']}"
