@@ -72,52 +72,41 @@ for i in range(duration):
     all_viewers = [item.lower() for item in total_list]
     lurker_points_csv = 'lurker_points.csv'
    
-    def open_csv ():
+   
     # create first text file
-        with open("All_viewers.txt", 'w') as file:
-            lower_caseshit = '\n'.join(total_list).lower()
-            file.write(lower_caseshit)
+    # with open("All_viewers.txt", 'w') as file:
+    #     lower_caseshit = '\n'.join(total_list).lower()
+    #     file.write(lower_caseshit)
 
-    
-        racer_info = {}
-        perfect_lurker = {}
-        existing_lurker = {}
-        with open (racer_csv,'r') as file:
-            lines = csv.reader(file)
-            racer_info ={l[0]: l[1] for l in lines}
-            perfect_lurker.update(racer_info)
-            # print('perfect_lurker')
-            # print(perfect_lurker)
+    racer_info = {}
+    perfect_lurker = {}
+    with open (racer_csv,'r') as file:
+        lines = csv.reader(file)
+        racer_info = {l[0]: {'score':l[1],'url':l[2]} for l in lines}
+        perfect_lurker.update(racer_info)
         
-        existing_lurker = {key: value for key, value in perfect_lurker.items() if key.lower() in all_viewers}
-        # print('the existing lurkers', existing_lurker) 
+#reads csv with points and makes into dict
+    # lurker_points = 'lurker_points.csv'
+    # with open(lurker_points, 'r') as file:
+    #     reader = csv.reader(file)
+        # existing_racers = {l[0]: {'score':l[1],'url':l[2]} for l in reader}
 
-        lurker_points = 'lurker_points.csv'
-        with open(lurker_points, 'r') as file:
-            reader = csv.reader(file)
-            existing_racers = {l[0]: {'score':l[1],'url':l[2]} for l in reader}
 
-        #add score and combine dict for final 
-        
-        # for racer in existing_lurker:
-        #     score = int(existing_racers[racer]['score'])+1 if racer in existing_racers else 0
-        #     lurker_score[racer] = {'score': score, 'url': racer_info.get(racer, '')}
-        lurker_score = {}
-        for racer in existing_lurker:
-            if racer in existing_racers:
-                score = int(existing_racers[racer]['score']) + 1
-            else:
-                if racer in racer_info:
-                    score = +0
-            lurker_score[racer] = {'score': score, 'url': racer_info.get(racer, '')}
-
-     
-        with open("lurker_points.csv", "w") as file:
-            for name in lurker_score.keys():
-                final_output = f"{name},{lurker_score[name]['score']},{lurker_score[name]['url']}"
-                print('final output:', final_output)
-                file.write(final_output + '\n')
+    #run first test loop to see if key in Perfect_lurker
+    existing_racers ={}
+    for key in perfect_lurker.keys():
+        if key.lower() in all_viewers:  # Check if key is in all_viewers
+            perfect_lurker[key]['score'] = str(int(perfect_lurker[key]['score']) + 1)     
+    else:
+        print('No shit this user was deleted', key)
     
-    open_csv()
-    time.sleep(60)
+#make csv to run GODOT
+    with open("lurker_points.csv", "w") as file:
+        for name in perfect_lurker.keys():
+            final_output = f"{name},{perfect_lurker[name]['score']},{perfect_lurker[name]['url']}"
+            print('final output:', final_output)
+            file.write(final_output + '\n')
+
+    while 
+    time.sleep(15)
 driver.quit()

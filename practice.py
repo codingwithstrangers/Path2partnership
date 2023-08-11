@@ -177,9 +177,7 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
         #this is how we added the image url and to the dict.
         user_profiles = await client.fetch_users(names=[user_name])
         logger.info(user_profiles[0].profile_image)
-        strangest_racers[user_name.lower()] = {'is_available':True, 'image_url':user_profiles[0].profile_image}
-      
-        
+        strangest_racers[user_name.lower()] = {'is_available':True,'score':0, 'image_url':user_profiles[0].profile_image}     
         logger.info(f"Added {user_name.lower()}")
         await channel.send(f'@{payload.data.user.name.lower()}, Start Your Mother Loving Engines!! You are in the race Now!')
         write_to_file()
@@ -196,8 +194,8 @@ def write_to_file():
     with open(racer_csv, 'w') as file:
         for user_name in strangest_racers.keys():
             if strangest_racers[user_name.lower()]['is_available'] == True:
-                file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['image_url']}\n")
-
+                strangest_racers[user_name.lower()]['score'] = 0
+                file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['score']},{strangest_racers[user_name.lower()]['image_url']}\n")
 
 @esbot.event()
 #this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)
