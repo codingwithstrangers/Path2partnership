@@ -26,7 +26,7 @@ stream = "https://www.twitch.tv/codingwithstrangers/chat"
 
 
 #loop my shit duration of bot 
-duration = 380
+duration = 580
 
 #this wipes file
 # with open ('lurker_points.csv', 'w') as file:
@@ -190,5 +190,5 @@ for i in range(duration):
     
     #make csv to run GODOT
 
-    time.sleep(15)
+    time.sleep(60)
 driver.quit()

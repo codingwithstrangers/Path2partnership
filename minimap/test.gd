@@ -1,9 +1,10 @@
 extends Node
 var user_info_dict ={}
-var crown_follow
 
-
-
+@export var first_place:PathFollow2D
+@export var second_place:PathFollow2D
+@export var third_place:PathFollow2D
+@export var label_setting: LabelSettings
 
 func _ready():
 	var timer = Timer.new()
@@ -11,25 +12,6 @@ func _ready():
 	timer.wait_time = 3
 	add_child(timer)
 	timer.timeout.connect(not_ready)
-	
-	crown_follow = PathFollow2D.new()
-	crown_follow.name = "crown_follow"
-	crown_follow.rotates = false
-	add_child(crown_follow)
-	
-	var crown_sprite = Sprite2D.new()
-	crown_sprite.name = "crown"
-	crown_follow.add_child(crown_sprite)
-	crown_follow.rotation = 0
-	
-	#load image of crown
-	var crown_texture = preload("res://pngwing.com.png")
-	# Apply the ImageTexture to the crown sprite
-	crown_sprite.texture = crown_texture
-	crown_sprite.scale = Vector2(.07,.07)
-#add offset and data here 
-	var offset = Vector2(0,-50)
-	crown_sprite.position = offset
 	not_ready()
 	
 func not_ready():
@@ -58,19 +40,14 @@ func not_ready():
 			#use line 23 to make changes and add to child 
 			var score = Label.new()
 			sprite.add_child(score)
+			score.label_settings = label_setting
+			
 			
 			score.scale = Vector2(5,5)
 			score.position.y = -250
 			score.position.x = -150
 			
-			score = Label.new()
-			sprite.add_child(score)
-
-			score.scale = Vector2(5, 5)
-			score.position.y = -250
-			score.position.x = -150
-
-				
+					
 			#adding user to global user and the nods we want to update in the future
 			user_info_dict[name] = {"follow": follow,'score_label':score}
 			
@@ -87,19 +64,25 @@ func not_ready():
 			user_info_dict.erase(existing_user)
 			
 	#find top score to get the 
-	var top_score = find_top_score_(updated_dict)
-	crown_follow.progress_ratio = top_score/60.0
+	var top_score = find_top_scores(updated_dict, 3)
+	if  top_score.size() > 0:
+		first_place.progress_ratio = top_score[0]/60.0
+	if  top_score.size() > 1:
+		second_place.progress_ratio = top_score[1]/60.0
+	if  top_score.size() > 2:	
+		third_place.progress_ratio = top_score[2]/60.0
 
-func find_top_score_(updated_dict):
-	var top_score = -1
+func find_top_scores(updated_dict, n):
 	
+	var big_three = []
 	for name in updated_dict.keys():
 		var points = updated_dict[name]['points']
-		
-		if points > top_score:
-			top_score = points
-	print(top_score,"pokemon")		
-	return top_score
+		big_three.append(points)
+	big_three.sort()
+	big_three.reverse()
+	
+	print(big_three,"pokemon")		
+	return big_three.slice(0,n)
 	
 	#this is the func to open and get all the data
 func csv_to_dict():

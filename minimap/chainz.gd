@@ -50,15 +50,7 @@ func not_ready():
 			score.position.y = -250
 			score.position.x = -150
 
-			# Create a Stroke instance and configure it
-#			Color outline_color = Color(1, 1, 1, 1)
-#			score.get_outlin
-#		
-			
-
-			
-			
-			
+				
 			#adding user to global user and the nods we want to update in the future
 			user_info_dict[name] = {"follow": follow,'score_label':score}
 			
@@ -73,19 +65,9 @@ func not_ready():
 		if not updated_dict.has(existing_user):
 			user_info_dict[existing_user]['follow'].queue_free()
 			user_info_dict.erase(existing_user)
-			
+		
 	
-#	var sprite1 = Sprite2D.new()
-#	sprite1.name = "Bruh1"
-#	load_image_into_sprite("https://via.placeholder.com/512", sprite1)
-#	var sprite2 = Sprite2D.new()
-#	sprite2.name = "Bruh2"
-#	load_image_into_sprite("https://via.placeholder.com/512", sprite2)
-#	#trying out moving the sprites
-#	sprite2.offset = Vector2(600,400)
-#
-	
-	
+	#this is the func to open and get all the data
 func csv_to_dict():
 	var file = FileAccess.open("F://Coding with Strangers//Path2partnership//lurker_points.csv", FileAccess.READ)
 	var users = {}
@@ -98,7 +80,7 @@ func csv_to_dict():
 	return users
 	
 	
-	
+	#creates image type to store image url string 
 func image_type(url: String) ->String:
 	var split = url.split('.')
 	if  split.size() > 1:
@@ -110,7 +92,7 @@ func image_type(url: String) ->String:
 		return "If you are reading this its already to late"
 	
 	
-	
+	#this is the request used to acll the url stored
 func load_image_into_sprite(url: String, sprite: Sprite2D):
 	var http_request = HTTPRequest.new()
 	add_child(http_request)
@@ -119,7 +101,7 @@ func load_image_into_sprite(url: String, sprite: Sprite2D):
 	if error != OK:
 		push_error("An error occurred in the HTTP request.")
 		
-
+#image types and storying types also erros to follow
 func _on_HTTPRequest_request_completed(result, response_code, headers, body, sprite, url, http_request):
 	if response_code == 200:
 		var error = FAILED

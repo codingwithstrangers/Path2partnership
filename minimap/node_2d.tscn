@@ -1,7 +1,11 @@
-[gd_scene load_steps=4 format=3 uid="uid://corcw8alcmnr6"]
+[gd_scene load_steps=10 format=3 uid="uid://corcw8alcmnr6"]
 
 [ext_resource type="Texture2D" uid="uid://bsl1dvk0574xm" path="res://demo bg.png" id="2_qai1a"]
-[ext_resource type="Script" path="res://chainz.gd" id="2_rkr8s"]
+[ext_resource type="Script" path="res://test.gd" id="2_yg6w3"]
+[ext_resource type="FontFile" uid="uid://bd3a8prs8wuga" path="res://DIRECTION.TTF" id="3_5u03q"]
+[ext_resource type="Texture2D" uid="uid://dvmf0dv441keg" path="res://pngwing.com.png" id="3_l2jd5"]
+[ext_resource type="Texture2D" uid="uid://c4wq8livciosy" path="res://kisspng-crown-computer-icons-silver-clip-art-5ae12ef8518473.8261747215247070643339.png" id="4_716ot"]
+[ext_resource type="Texture2D" uid="uid://dfq4dqj0g6eap" path="res://vecteezy_3d-icon-of-crown_22288601_685.png" id="5_4311a"]
 
 [sub_resource type="Curve2D" id="Curve2D_dewcc"]
 bake_interval = 46.51
@@ -9,6 +13,14 @@ _data = {
 "points": PackedVector2Array(0, 0, 0, 0, 118, 148, 0, 0, 0, 0, 114, 669, 0, 0, 0, 0, 834, 669, 0, 0, 0, 0, 835, 146, 0, 0, 0, 0, 118, 148)
 }
 point_count = 5
+
+[sub_resource type="LabelSettings" id="LabelSettings_y3png"]
+font = ExtResource("3_5u03q")
+font_size = 23
+outline_size = 5
+outline_color = Color(0, 0, 0, 1)
+
+[sub_resource type="CanvasItemMaterial" id="CanvasItemMaterial_5akrv"]
 
 [node name="Node2D" type="Node2D"]
 
@@ -31,6 +43,46 @@ grow_vertical = 2
 horizontal_alignment = 1
 vertical_alignment = 1
 
-[node name="Path2D" type="Path2D" parent="."]
+[node name="Path2D" type="Path2D" parent="." node_paths=PackedStringArray("first_place", "second_place", "third_place")]
 curve = SubResource("Curve2D_dewcc")
-script = ExtResource("2_rkr8s")
+script = ExtResource("2_yg6w3")
+first_place = NodePath("1st place")
+second_place = NodePath("2nd place")
+third_place = NodePath("3rd place")
+label_setting = SubResource("LabelSettings_y3png")
+
+[node name="1st place" type="PathFollow2D" parent="Path2D"]
+position = Vector2(118, 148)
+rotation = 0.0523599
+rotates = false
+
+[node name="Sprite2D" type="Sprite2D" parent="Path2D/1st place"]
+z_index = 5
+z_as_relative = false
+position = Vector2(25, -25)
+rotation = 0.523599
+scale = Vector2(0.07, 0.07)
+texture = ExtResource("3_l2jd5")
+
+[node name="2nd place" type="PathFollow2D" parent="Path2D"]
+z_index = 5
+z_as_relative = false
+rotates = false
+
+[node name="Sprite2D" type="Sprite2D" parent="Path2D/2nd place"]
+modulate = Color(0.498039, 0.498039, 0.498039, 1)
+material = SubResource("CanvasItemMaterial_5akrv")
+position = Vector2(25, -25)
+rotation = 0.523599
+scale = Vector2(0.107281, 0.107281)
+texture = ExtResource("4_716ot")
+
+[node name="3rd place" type="PathFollow2D" parent="Path2D"]
+visible = false
+position = Vector2(118, 148)
+rotates = false
+
+[node name="Sprite2D" type="Sprite2D" parent="Path2D/3rd place"]
+position = Vector2(0, -50)
+scale = Vector2(0.011, 0.011)
+texture = ExtResource("5_4311a")
