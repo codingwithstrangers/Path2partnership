@@ -1,8 +1,9 @@
 import pprint
-from typing import Optional, Dict
-from twitchio.ext import pubsub, commands, routines
+from typing import Optional
+from twitchio.ext import pubsub, commands
 from configuration import *
 import logging
+
 
 #Debug
 logging.basicConfig(level=logging.INFO) # Set this to DEBUG for more logging, INFO for regular logging
@@ -14,13 +15,10 @@ lurkers_points = 'lurker_points.csv'
 
 #custom_id for channel points
 perfect_lurker_channel_id="a374b031-d275-4660-9755-9a9977e7f3ae"
-talking_lurker_id="d229fa01-0b61-46e7-9c3c-a1110a7d03d4"
-all_viewers ="F:\Coding with Strangers\Path2partnership\All_Viewers.txt"
 
 #class global variables for Lurker
 status_in_race = "in_race"
 status_out_race = "out_race"
-status_removed_race ="left_race"
 item_none = "none"
 item_shield = "shield"
 item_trap = "trap"
@@ -32,9 +30,6 @@ class Lurker:
         self.race_status = status_out_race
         self.item = item_none
         self.points = 0
-    
-    def __str__(self):
-        return f"username:{self.user_name} racestatus:{self.race_status} point:{self.points} raceitem:{self.item} "
 
     def join_race(self)-> bool:
         if self.race_status == status_out_race:
@@ -42,17 +37,11 @@ class Lurker:
             return True
         return False
 
-    def leave_race(self)-> bool:
-        if self.race_status == status_in_race:
-            self.race_status = status_removed_race
-            return True
-        return False
-
+    def leave_race(self):
+        self.race_status = status_out_race
 
     def add_points(self, delta: int):
-        if self.race_status != status_in_race:
-            return
-        self.points = max(self.points +delta, 0) 
+        self.points += delta
 
     def equip_item(self, new_item: str):
         self.item = new_item
@@ -63,39 +52,37 @@ class Lurker:
         
 class LurkerGang:
     def __init__(self):
-        self._lurkers:Dict[str, Lurker] = {}
+        self._lurker = {}
+        
+    def add(self, lurker: Lurker ):
+        self._lurker[lurker.user_name] = lurker
 
     def __getitem__(self, key:str)-> Optional[Lurker]:
-        return self._lurkers.get(key)
-    
-    def __iter__(self):
-        return iter(self._lurkers.values())
-    
-    def add(self, lurker: Lurker ):
-        self._lurkers[lurker.user_name] = lurker
-    
-    async def give_point_timer(self):
-        print('timer ticket toc')
-        with open(all_viewers, 'r') as file:
-            lines = {name.strip() for name in file}
-            
-            #I want to give everyone who is in lurkergang
-            # a point if they are in all_viewers and
-            #  they have in race status
-        for lurker in self._lurkers.values():
-            if lurker.user_name in lines:
-                lurker.add_points(+1)
+        return self._lurker.get(key)
         
-            
+#write how you want the Lurkergang to work
+# lurker_gang = LurkerGang()
+# # lurker_racer = Lurker(user_id='Heero')
+# lurker_gang.add('')
 
-            
+#find the person that  talked
+# lurker_gang['Heero'].add_point(-1)
+# chat_lurker = lurker_gang[event.sender]
+# if chat_lurker is None:
+#     chat_lurker = Lurker(user_id= event.sender)
+#     lurker_gang.add(chat_lurker)
+# if chat_lurker.race_status == status_in_race:
+#     chat_lurker.add_points(-1)
 
+
+#key items and status
 
 
 class Bot_one(commands.Bot):
     def __init__(self):
         super().__init__(token= USER_TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker",)
+        # self.add_event(self.event_pubsub_channel_points)
         self.pubsub = pubsub.PubSubPool(self)
         self.lurker_gang = LurkerGang()
     
@@ -121,40 +108,39 @@ class Bot_one(commands.Bot):
             await channel.send(f'@{chat_lurker.user_name}, hey sorry you can only enter the race once per stream coding32Whatmybrother ') 
      
     async def event_pubsub_channel_points(self, event: pubsub.PubSubChannelPointsMessage):
+        #how to find the channel reqard point
         pprint.pprint(event.reward) #rerun in terminal look for id
         
         if event.reward.id == perfect_lurker_channel_id:
             await self.lurker_joins_race(event)
 
-    #remove points for talking 
-    async def event_message(self, message):
-        if message.echo:
-            return
-        talking_lurker = await self.create_or_get_lurker(message.author.name)
-        talking_lurker.add_points(-1)
-        await self.handle_commands(message)
-
     #We want toRemove users for m Strangest racer
     #when user use !remove
     @commands.command()
     async def remove(self, ctx: commands.Context):
-        removed_lurker = await self.create_or_get_lurker(ctx.author.name)
+        print('you slippery when wet mother lover')
 
-        if removed_lurker.leave_race():
-            await ctx.send(f'Ok Ok take yo last place havin ass on then @{removed_lurker.user_name}!')
-        else:
-            await ctx.send(f'@{removed_lurker.user_name}! DADDY CHILL... you are not in the race') 
+        print("strangest_racers")
+    #     user= ctx.author.name.lower()
+    #     #first check the false_lurker for true users
+    #     if user in false_lurkers:
+    #         await ctx.send(f'@{ctx.author.name}! DADDY CHILL... you are not in the race')
+    #         print(false_lurkers, 'Lurkers')
 
-    #get points command
-    @commands.command()
-    async def points(self, ctx: commands.Context):
-        if ctx.author.name != "codingwithstrangers":
-            return 
-        for lurker in self.lurker_gang:
-            print(lurker)
-        
+    # #this will add the user to the false lurker as true and mke the user false in the strangest racer
+    #     else:
+    #         if user in strangest_racers:
+    #             strangest_racers[user]['is_available'] = False
+    #             # if not strangest_racers[user]:
+    #             false_lurkers[user]= True
+    #             # write_to_file()
+    #             # message sent if they are removed
+    #             await ctx.send(f'Ok Ok take yo last place havin ass on then @{ctx.author.name}!')
+    #             print(false_lurkers, 'my demon')
+    
 
-   #last function
+
+
     async def run(self):
         topics = [
             pubsub.channel_points(USER_TOKEN)[int(BROADCASTER_ID)],
@@ -163,10 +149,8 @@ class Bot_one(commands.Bot):
         await self.pubsub.subscribe_topics(topics)
         print('this shit work? pt2')
         await self.start()
-    
         
 bot= Bot_one()
-routines.routine(seconds=10)(bot.lurker_gang.give_point_timer).start()
 bot.loop.run_until_complete(bot.run())
 # bot.loop.run_until_complete(bot.__ainit__())
 #START UP CODE ENDS

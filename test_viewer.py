@@ -11,14 +11,14 @@ from selenium import webdriver
 import chromedriver_autoinstaller
 
 #path to webdriver
-driver_path = "F:\Coding with Strangers\Path2partnership\chromedriver_win32\chromedriver.exe"
+driver_path = "F:\Coding with Strangers\Path2partnership\16chromedriver-win64\chromedriver-win64\chromedriver.exe"
 
 #headless
 options = Options()
 options.add_argument("--headless")
 
 #create driver instance
-driver = webdriver.Chrome(executable_path=driver_path,options=options)
+driver = webdriver.Chrome(options=options)
 
 #stream you want to monitor
 stream = "https://www.twitch.tv/codingwithstrangers/chat"
@@ -31,6 +31,13 @@ duration = 580
 #this wipes file
 # with open ('lurker_points.csv', 'w') as file:
 #     pass
+
+exe_file_path = '"F:\Coding with Strangers\Path2partnership\minimap\The Perfect Lurker.exe"'
+try:
+    # Open the executable file
+    os.startfile(exe_file_path)
+except Exception as e:
+    print(f"Error: {e}")
 
 #the loop
 for i in range(duration):
@@ -70,10 +77,13 @@ for i in range(duration):
     #vatiables for code
     import csv
 
+
+
+#Part two of Code used to set up CSV
     racer_csv = "the_strangest_racer.csv"
     all_viewers = [item.lower() for item in total_list]
     lurker_points_csv = 'lurker_points.csv'
-
+    
     # Reads and puts the perfect lurker into dict.
     racer_info = {}
     perfect_lurker = {}
@@ -108,13 +118,7 @@ for i in range(duration):
             if key.lower() in all_viewers:
                 perfect_lurker[key]['score'] = str(int(perfect_lurker[key]['score']) + 1)
             existing_racers[key] = perfect_lurker[key]
-    # for key in perfect_lurker:
-    #     if key not in existing_racers:
-    #         existing_racers[key] = perfect_lurker[key]
-
-    #     if key.lower() in all_viewers:
-    #         existing_racers[key]['score'] = str(int(existing_racers[key]['score']) + 1)
-
+  
     # Write the updated scores back to the CSV file
     with open("lurker_points.csv", "w") as file:
         for name in existing_racers.keys():
@@ -123,72 +127,9 @@ for i in range(duration):
 
     print("Scores have been updated and written to the file.")
 
-#     racer_csv = "the_strangest_racer.csv"
-#     all_viewers = [item.lower() for item in total_list]
-#     lurker_points_csv = 'lurker_points.csv'
 
-#    #reads and puts the perfect lurker into dict.
-#     racer_info = {}
-#     perfect_lurker = {}
-#     with open (racer_csv,'r') as file:
-#         lines = csv.reader(file)
-#         racer_info = {l[0]: {'score':l[1],'url':l[2]} for l in lines}
-#         perfect_lurker.update(racer_info)
-        
-# # reads csv with points and makes into dict
-#     existing_racers ={}
-#     lurker_points = 'lurker_points.csv'
-#     with open(lurker_points, 'r') as file:
-#         reader = csv.reader(file)
-#         existing_racers = {l[0]: {'score':l[1],'url':l[2]} for l in reader}
-
-# #step 1 check perfect lurker and lurkers points
-    
-#     for key in perfect_lurker:    
-#         if key != existing_racers.get(key):
-#             existing_racers[key] = perfect_lurker[key]
-
-#             #check if existing in all_viewers
-#             if key.lower() in all_viewers:  # Check if key is in all_viewers
-#                 existing_racers[key]['score'] = str(int(existing_racers[key]['score']) + 1) 
-    
-#     #get final csv
-    
-#     with open("lurker_points.csv", "w") as file:
-#         for name in existing_racers.keys():
-#             final_output = f"{name},{existing_racers[name]['score']},{existing_racers[name]['url']}"
-#             print('final output:', final_output)
-#             file.write(final_output + '\n')
-#             print('score is updating')
-
-
-
-    # create first text file
-    # with open("All_viewers.txt", 'w') as file:
-    #     lower_caseshit = '\n'.join(total_list).lower()
-    #     file.write(lower_caseshit)
-    # #check if key of perfect_lurker is in existing racer
-    # check_lurkers = {}
-    # for key in existing_racers:
-    #     if key not in perfect_lurker:
-    #         #update csv to with check user
-    #         check_lurkers[key] = perfect_lurker[key]
-        
-    #     else:
-    #         check_lurkers[key] = existing_racers[key]
-    
-
-
-    # #run first test loop to see if key in check_lukrer
-    
-    #     for key in check_lurkers.keys():
-    #         if key.lower() in all_viewers:  # Check if key is in all_viewers
-    #             check_lurkers[key]['score'] = str(int(check_lurkers[key]['score']) + 1) 
-    
-    #     else:
-    #         print('No shit this user was deleted', key)
-    
-    #make csv to run GODOT
 
     time.sleep(60)
+# let print text info
+
 driver.quit()

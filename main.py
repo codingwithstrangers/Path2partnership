@@ -1,10 +1,11 @@
 import logging; 
 import csv
 import os
+import subprocess
 import time
 from typing import List
 import twitchio
-import datetime
+from datetime import datetime  
 from twitchio import Message, Client
 from twitchio.ext import commands, eventsub
 from twitchio.user import User
@@ -59,10 +60,7 @@ class Bot(commands.Bot):
         super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
             nick = "Perfect_Lurker")
         
-        
     async def event_message(self, message): 
-        
-        
         exclude_users = ['nightbot','streamlabs','codingwithstrangers', 'sockheadrps']
         if message.echo:
             return
@@ -114,33 +112,6 @@ class Bot(commands.Bot):
 
         await self.handle_commands(message)
 
-    #get images of users in race
-   
-
-
-        
-    
-        
-        # def update_csv(self, lurker_points, lurkers_chats):
-        #     with open(lurkers_points, 'w+') as csv_file:
-        #         reader = csv.reader(csv_file)
-        #         rows = list(reader)
-        #         name_column = 0
-        #         point_column = 1
-
-        #         for row in rows:
-        #             name = row[name_column]
-        #             if name in self.lurkers_chats and name in row[name_column]:
-        #                 if row[point_column]: #I want to check whats in column b
-        #                     row[point_column] = str(int(row[point_column]) -1)
-        #         with open(lurker_points, 'w', newline='') as csv_file:
-        #             writer = csv.writer(csv_file)
-        #             write_to_file()
-
-        # lurkers_chats = self.lurkers_chat       
-        # write_to_file(self, lurker_points, lurkers_chats)
-
-        
     @commands.command()
     async def remove(self, ctx: commands.Context):
         print('you slippery when wet mother lover')
@@ -163,14 +134,54 @@ class Bot(commands.Bot):
                 await ctx.send(f'Ok Ok take yo last place havin ass on then @{ctx.author.name}!')
                 print(false_lurkers, 'my demon')
 
+    @commands.command()
+    #make command for txt file
+    async def perfect_lurker(self, ctx: commands.Context):
+        if ctx.author.is_broadcaster or ctx.author.is_mod:
+            print('Iam the boss')
+            #make a list
+            # Create a list to store the data
+            racer_data = {}
+            # Open the CSV file
+            with open('lurker_points.csv', 'r', newline='') as csvfile:
+                reader = csv.reader(csvfile)
+                next(reader)  # Skip the header row (if any)
 
-    
-    # def __init__(self):
-    #     super().__init__(token=_TOKEN, prefix="!", initial_channels=_CHANNEL_NAME)
-    # def __init__(self):
-    #     super().__init__(token= TOKEN , prefix='!', initial_channels=['codingwithstrangers'],
-    #             nick = "Perfect_Lurker")
-   
+                # Iterate through each row in the CSV and append it to racer_data
+                for row in reader:
+                    if len(row) >= 3:
+                        username = row[0]
+                        score = int(row[1])
+                        url = row[2] if len(row) > 2 else ''
+                        racer_data[username] = {'score': score, 'url': url}
+
+                # Sort the racer_data dictionary by the 'score' key in descending order
+                sorted_racer_data = dict(sorted(racer_data.items(), key=lambda x: x[1]['score'], reverse=True))
+                # Get the top 3 usernames
+                top_usernames = list(sorted_racer_data.keys())[:3]
+                current_date = datetime.now().strftime('%Y-%m-%d')
+                for username in top_usernames:
+                    racer_data[username]['date'] = current_date
+
+            # Write the racer_data to 'lurkers_data.csv'
+        # ...
+
+            # Open the CSV file for writing with the 'with' block
+            with open('lurkers_data.csv', 'a', newline='') as csvfile:
+                fieldnames = ['username', 'score', 'url', 'date']
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames)
+
+                for username, data in racer_data.items():
+                    # Check if 'date' key is missing in data dictionary, and add it
+                    if 'date' not in data:
+                        data['date'] = current_date
+                    writer.writerow({'username': username, 'score': data['score'], 'url': data['url'], 'date': data['date']})
+                # Create a text file for each of the top 3 users
+                for i, username in enumerate(top_usernames):
+                    with open(f'{i+1}st_place.txt', 'w') as text_file:
+                        text_file.write(username + '\n')
+                        text_file.write(str(racer_data[username]['score']))
+            # ...
 
     async def __ainit__(self) -> None:
         self.loop.create_task(esclient.listen(port=_ESCLIENT_PORT))
@@ -197,7 +208,7 @@ bot.loop.run_until_complete(bot.__ainit__())
 async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.CustomReward) -> None:
     user_name = payload.data.user.name
     channel = bot.get_channel('codingwithstrangers')
-    max_racers = 30
+    max_racers = 100
     logger.info(f"{payload.data.redeemed_at}, Redeem Event, {payload.data.id}, {payload.data.broadcaster.name}, {payload.data.user.name}, {payload.data.reward.title}, {payload.data.status}"
      )         
 
@@ -212,15 +223,7 @@ async def event_eventsub_notification_channel_reward_redeem(payload: eventsub.Cu
         #this is how we added the image url and to the dict.
         user_profiles = await client.fetch_users(names=[user_name])
         logger.info(user_profiles[0].profile_image)
-        strangest_racers[user_name.lower()] = {'is_available':True, 'image_url':user_profiles[0].profile_image}
-        '''
-        { heeer:  { is_aviable:True, image_url: "string of url" },
-            Caddac: { is_aviable:True, image_url: "string of url" }}
-        strangest_racers['heer']['image_url'] 
-
-
-        '''
-        
+        strangest_racers[user_name.lower()] = {'is_available':True,'score':0, 'image_url':user_profiles[0].profile_image}     
         logger.info(f"Added {user_name.lower()}")
         await channel.send(f'@{payload.data.user.name.lower()}, Start Your Mother Loving Engines!! You are in the race Now!')
         write_to_file()
@@ -237,8 +240,8 @@ def write_to_file():
     with open(racer_csv, 'w') as file:
         for user_name in strangest_racers.keys():
             if strangest_racers[user_name.lower()]['is_available'] == True:
-                file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['image_url']}\n")
-
+                strangest_racers[user_name.lower()]['score'] = 0
+                file.write(f"{user_name.lower()},{strangest_racers[user_name.lower()]['score']},{strangest_racers[user_name.lower()]['image_url']}\n")
 
 @esbot.event()
 #this is how you pull the events for ONLY SHoutout to me this is only listening (may block other listeners)
@@ -260,4 +263,3 @@ async def event_eventsub_subscribe_channel_follows_v2(payload: eventsub.ChannelF
     #cant do it this way need token and autho of every viewer 
         
 bot.run()
-
