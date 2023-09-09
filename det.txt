@@ -26,7 +26,8 @@ Visual things
 (traps )
 
 client_id = comes from console on twitch developer it is called client id 
-twitch oauth = https://twitchapps.com/tmi/
+twitch oauth = https://twitchapps.com/tmi/ is meaningless
+we need token to = mod token and user_token = author token
 access token is really your token and you get from access token from here = https://twitchtokengenerator.com/?code=5ufjtyqsgris4pl4f77ebzw4fq1lgp&scope=clips%3Aedit+bits%3Aread+chat%3Aread+chat%3Aedit+channel%3Aread%3Aredemptions&state=frontend%7COUtSUkxyQjBiaEN3TjFENWI0eDRVUT09
 
 Game time
@@ -55,3 +56,8 @@ What do we want to do
 How it works
 1. racers in csv will start at starting line and never go into negative
 2. 
+
+
+Version 2.0
+1. convert esclient to pubsub (no more webhook)
+2. make the bot listen only for specific channel point  
